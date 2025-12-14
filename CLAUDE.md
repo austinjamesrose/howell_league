@@ -1,42 +1,43 @@
 # Howell League - Development Log
 
-## 🚨 CURRENT STATUS (December 13, 2025)
+## 🎉 CURRENT STATUS (December 14, 2025) - **FULLY DEPLOYED AND WORKING!**
 
 ### ✅ What's Working:
 - **Backend deployed on Railway**: https://howellleague-production.up.railway.app
-  - API endpoints working ✅
+  - All API endpoints working ✅
   - PostgreSQL database connected ✅
   - 6 teams seeded ✅
   - 48 QBs seeded ✅
   - NFL stats synced (43/48 QBs) ✅
   - QB wins synced (190 wins) ✅
+  - CORS configured correctly ✅
 
 - **Frontend deployed on Railway**: https://dill-qb-league.up.railway.app
   - Site loads ✅
   - React app running ✅
+  - **All pages working** ✅
+  - Home/Standings page ✅
+  - Rosters page with full QB lists ✅
+  - Players/QB Details pages ✅
+  - Admin panel ✅
 
-### ❌ BLOCKING ISSUE:
-**CORS Error** - Frontend cannot communicate with backend
+### 🐛 Issue RESOLVED (December 14, 2025):
+**Problem**: Frontend could load some endpoints but not others (rosters, standings failing)
 
-**Error Message:**
-```
-Access to fetch at 'https://howellleague-production.up.railway.app/api/standings/'
-from origin 'https://dill-qb-league.up.railway.app' has been blocked by CORS policy:
-No 'Access-Control-Allow-Origin' header is present on the requested resource.
-```
+**Root Cause**: API route definitions missing trailing slashes
+- Frontend API client uses trailing slashes on all calls (e.g., `/api/squads/1/roster/`)
+- Some backend routes defined without trailing slashes (e.g., `@router.get("/{squad_id}/roster")`)
+- FastAPI issued HTTP 307 redirects for mismatched routes
+- During redirect, Railway proxy downgraded HTTPS → HTTP
+- Browsers blocked mixed content (HTTPS page loading HTTP resources)
 
-**What We've Tried:**
-1. ✅ Added FRONTEND_URL environment variable to backend
-2. ✅ Hardcoded frontend URL in CORS allowed_origins
-3. ✅ Verified backend is responding (curl works)
-4. ❌ CORS still blocking despite configuration
+**Solution**: Added trailing slashes to 6 backend route definitions
+- `squads.py`: `/{squad_id}/roster` → `/{squad_id}/roster/`
+- `standings.py`: `/worst-qb` → `/worst-qb/`
+- `quarterbacks.py`: `/{qb_id}` → `/{qb_id}/`
+- `admin.py`: `/weekly-stats`, `/bonuses`, `/playoffs` → all with trailing slashes
 
-**Next Steps to Debug:**
-1. Check Railway backend logs to verify CORS middleware is loading
-2. Verify the backend redeployment actually picked up the code changes
-3. Test CORS with a simple curl command to see what headers are returned
-4. Consider adding wildcard CORS temporarily to isolate issue
-5. Check if there's a Railway-specific CORS configuration needed
+**Result**: All endpoints now work without redirects! Frontend fully functional. 🎉
 
 ---
 
@@ -621,35 +622,33 @@ railway domain
 - **Deployment Platform**: Railway (both frontend and backend)
 
 
-## 🎉 BREAKTHROUGH (December 13, 2025 - Late Session)
+## Recent Changes (December 14, 2025)
 
-### CORS IS WORKING! 
-The frontend CAN communicate with backend - some data is loading:
-- ✅ **Players tab**: Shows all QBs (calls `/api/quarterbacks/` endpoint)
-- ✅ **Rosters tab**: Shows team names (calls `/api/squads/` endpoint)
-- ❌ **Rosters tab**: NOT showing players on each team (calls `/api/squads/{id}/roster/`)
-- ❌ **Home/Standings**: Still showing "failed to load standings" (calls `/api/standings/` and `/api/standings/worst-qb/`)
+### Fixed: API Trailing Slash Issue - DEPLOYMENT NOW FULLY WORKING! 🎉
 
-### Partial Success Indicates:
-1. CORS configuration IS working (some endpoints respond)
-2. Issue may be specific to certain endpoints or data structure
-3. Could be a frontend rendering issue, not CORS
+**What was wrong**:
+- Some API routes were defined without trailing slashes
+- Frontend always calls with trailing slashes
+- Mismatch caused HTTP 307 redirects that downgraded HTTPS → HTTP
+- Browsers blocked the mixed content
 
-### Next Steps:
-1. Check browser console for specific errors on Home page
-2. Test `/api/standings/` endpoint directly in browser
-3. Check `/api/squads/{id}/roster/` endpoint for specific squad
-4. May be a data format issue or frontend bug, not CORS
+**What was fixed**:
+- Added trailing slashes to all 6 problematic routes
+- Committed and pushed to Railway
+- Backend auto-deployed with fixes
+- All endpoints now work without redirects
 
-### Quick Tests:
+**Verified working**:
 ```bash
-# Test standings endpoint (failing on home page)
-curl https://howellleague-production.up.railway.app/api/standings/
-
-# Test roster endpoint (failing to show players)
-curl https://howellleague-production.up.railway.app/api/squads/1/roster/
-
-# Test quarterbacks endpoint (WORKING on players page)
-curl https://howellleague-production.up.railway.app/api/quarterbacks/
+# All endpoints return 200 OK with data:
+✅ GET /api/standings/ - Returns full standings
+✅ GET /api/standings/worst-qb/ - Returns worst QB
+✅ GET /api/squads/1/roster/ - Returns squad roster
+✅ GET /api/quarterbacks/1/ - Returns QB details
 ```
+
+**Live URLs**:
+- Frontend: https://dill-qb-league.up.railway.app
+- Backend: https://howellleague-production.up.railway.app
+- API Docs: https://howellleague-production.up.railway.app/docs
 
