@@ -86,84 +86,60 @@ export default function QBDetails() {
           </div>
         </div>
 
-        {qb.breakdown.weekly_stats.stats.length > 0 && (
+        {qb.breakdown.aggregate_stats && (
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Weekly Stats</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Week
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      Pass Yds
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      Rush Yds
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      Pass TD
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      Rush TD
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      INT
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      FUM
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                      Win
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      Points
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {qb.breakdown.weekly_stats.stats.map((stat) => (
-                    <tr key={stat.week} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                        Week {stat.week}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-right text-gray-700">
-                        {stat.passing_yards}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-right text-gray-700">
-                        {stat.rushing_yards}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-right text-gray-700">
-                        {stat.passing_tds}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-right text-gray-700">
-                        {stat.rushing_tds}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-right text-red-600">
-                        {stat.interceptions}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-right text-red-600">
-                        {stat.fumbles}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-center">
-                        {stat.game_won ? (
-                          stat.prime_time_win ? (
-                            <span className="text-yellow-500">★ W</span>
-                          ) : (
-                            <span className="text-green-600">W</span>
-                          )
-                        ) : (
-                          <span className="text-gray-400">L</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-right font-bold text-blue-600">
-                        {stat.points.toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Season Aggregate Stats</h2>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="text-xs text-gray-600 mb-1">Total Pass Yards</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {qb.breakdown.aggregate_stats.passing_yards.toLocaleString()}
+                </div>
+              </div>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="text-xs text-gray-600 mb-1">Total Rush Yards</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {qb.breakdown.aggregate_stats.rushing_yards.toLocaleString()}
+                </div>
+              </div>
+              <div className="bg-green-50 p-4 rounded-lg">
+                <div className="text-xs text-gray-600 mb-1">Total Pass TD</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {qb.breakdown.aggregate_stats.passing_tds}
+                </div>
+              </div>
+              <div className="bg-green-50 p-4 rounded-lg">
+                <div className="text-xs text-gray-600 mb-1">Total Rush TD</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {qb.breakdown.aggregate_stats.rushing_tds}
+                </div>
+              </div>
+              <div className="bg-red-50 p-4 rounded-lg">
+                <div className="text-xs text-gray-600 mb-1">Total INT</div>
+                <div className="text-2xl font-bold text-red-600">
+                  {qb.breakdown.aggregate_stats.interceptions}
+                </div>
+              </div>
+              <div className="bg-red-50 p-4 rounded-lg">
+                <div className="text-xs text-gray-600 mb-1">Total Fumbles</div>
+                <div className="text-2xl font-bold text-red-600">
+                  {qb.breakdown.aggregate_stats.fumbles}
+                </div>
+              </div>
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <div className="text-xs text-gray-600 mb-1">Regular Wins</div>
+                <div className="text-xl font-bold text-purple-600">
+                  {qb.breakdown.aggregate_stats.regular_wins} ({qb.breakdown.aggregate_stats.regular_wins_points} pts)
+                </div>
+              </div>
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <div className="text-xs text-gray-600 mb-1">Primetime Wins</div>
+                <div className="text-xl font-bold text-yellow-600">
+                  {qb.breakdown.aggregate_stats.primetime_wins} ({qb.breakdown.aggregate_stats.primetime_wins_points} pts)
+                </div>
+              </div>
             </div>
           </div>
         )}

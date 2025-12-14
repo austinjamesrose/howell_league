@@ -43,6 +43,20 @@ def get_quarterback_details(qb_id: int, db: Session = Depends(get_db)):
     # Weekly stats breakdown
     weekly_stats = []
     weekly_total = 0.0
+
+    # Aggregate stats calculation
+    total_passing_yards = 0
+    total_rushing_yards = 0
+    total_passing_tds = 0
+    total_rushing_tds = 0
+    total_receiving_tds = 0
+    total_interceptions = 0
+    total_fumbles = 0
+    regular_wins = 0
+    regular_wins_points = 0.0
+    primetime_wins = 0
+    primetime_wins_points = 0.0
+
     for stat in qb.weekly_stats:
         weekly_stats.append({
             "week": stat.week,
@@ -58,6 +72,24 @@ def get_quarterback_details(qb_id: int, db: Session = Depends(get_db)):
             "points": stat.points
         })
         weekly_total += stat.points
+
+        # Accumulate aggregate stats
+        total_passing_yards += stat.passing_yards
+        total_rushing_yards += stat.rushing_yards
+        total_passing_tds += stat.passing_tds
+        total_rushing_tds += stat.rushing_tds
+        total_receiving_tds += stat.receiving_tds
+        total_interceptions += stat.interceptions
+        total_fumbles += stat.fumbles
+
+        # Count wins and their points
+        if stat.game_won:
+            if stat.prime_time_win:
+                primetime_wins += 1
+                primetime_wins_points += 4.0  # Primetime wins are worth 4 points
+            else:
+                regular_wins += 1
+                regular_wins_points += 3.0  # Regular wins are worth 3 points
 
     # Season bonuses breakdown
     bonuses = []
@@ -90,6 +122,19 @@ def get_quarterback_details(qb_id: int, db: Session = Depends(get_db)):
         "season": qb.season,
         "total_points": round(total_points, 2),
         "breakdown": {
+            "aggregate_stats": {
+                "passing_yards": total_passing_yards,
+                "rushing_yards": total_rushing_yards,
+                "passing_tds": total_passing_tds,
+                "rushing_tds": total_rushing_tds,
+                "receiving_tds": total_receiving_tds,
+                "interceptions": total_interceptions,
+                "fumbles": total_fumbles,
+                "regular_wins": regular_wins,
+                "regular_wins_points": round(regular_wins_points, 2),
+                "primetime_wins": primetime_wins,
+                "primetime_wins_points": round(primetime_wins_points, 2)
+            },
             "weekly_stats": {
                 "stats": weekly_stats,
                 "total": round(weekly_total, 2)
