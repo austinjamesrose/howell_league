@@ -2,16 +2,24 @@
 
 A web application for managing the Howell League, a unique QB-only fantasy football league with custom scoring rules.
 
+## 🌐 Live Application
+
+**Frontend**: https://dill-qb-league.up.railway.app
+**Backend API**: https://howellleague-production.up.railway.app
+**API Documentation**: https://howellleague-production.up.railway.app/docs
+
 ## Features
 
 - **League Standings** - View real-time standings with only the top 5 QBs per squad counting
+- **Projected Payouts** - See projected winnings based on current standings
 - **Worst QB Callout** - Prominently displays the worst performing QB (for league naming tradition)
 - **Squad Rosters** - View all 8 QBs rostered by each squad with top 5 indicators
 - **QB Details** - Detailed scoring breakdown for each quarterback including:
   - Weekly stats (yards, TDs, INTs, fumbles, wins)
   - Season bonuses (MVP, Rookie of Year, etc.)
   - Playoff appearances (cumulative points)
-- **Admin Panel** - Manual data entry for stats, bonuses, and playoff appearances
+- **Admin Panel** - Automated NFL stats sync and manual data entry
+- **NFL Stats Integration** - Automatic sync of stats and win tracking using nflreadpy
 
 ## League Rules
 
@@ -24,17 +32,25 @@ This league follows unique scoring rules documented in `league_rules.md`:
 ## Tech Stack
 
 ### Backend
-- Python 3.x
+- Python 3.13
 - FastAPI - Modern web framework
 - SQLAlchemy - ORM for database
-- SQLite - Lightweight database
+- PostgreSQL - Production database (Railway)
+- SQLite - Local development database
+- nflreadpy - NFL stats integration
 - Custom scoring engine based on league rules
 
 ### Frontend
-- React - UI library
-- Vite - Build tool
+- React 18 - UI library
+- Vite - Build tool and dev server
 - React Router - Navigation
 - Tailwind CSS - Styling
+
+### Deployment
+- **Platform**: Railway
+- **Backend**: Python service with PostgreSQL
+- **Frontend**: Static site served via `serve`
+- **CI/CD**: Automatic deployment from GitHub main branch
 
 ## Project Structure
 
@@ -194,31 +210,69 @@ Based on league_rules.md Section 6.2:
 ## API Endpoints
 
 ### Standings
-- `GET /api/standings/?season=2024` - Get league standings
-- `GET /api/standings/worst-qb?season=2024` - Get worst QB
+- `GET /api/standings/?season=2025` - Get league standings with projected payouts
+- `GET /api/standings/worst-qb/?season=2025` - Get worst QB
 
 ### Squads
-- `GET /api/squads/?season=2024` - Get all squads
-- `GET /api/squads/{id}/roster` - Get squad roster
+- `GET /api/squads/?season=2025` - Get all squads with points
+- `GET /api/squads/{id}/roster/` - Get squad roster (8 QBs with top 5 indicators)
 
 ### Quarterbacks
-- `GET /api/quarterbacks/?season=2024` - Get all QBs
-- `GET /api/quarterbacks/{id}` - Get QB details
+- `GET /api/quarterbacks/?season=2025` - Get all QBs ranked by points
+- `GET /api/quarterbacks/{id}/` - Get QB details with full scoring breakdown
 
 ### Admin
-- `POST /api/admin/weekly-stats` - Add weekly stats
-- `POST /api/admin/bonuses` - Add season bonus
-- `POST /api/admin/playoffs` - Add playoff appearance
+- `POST /api/admin/sync-stats/?season=2025` - Auto-sync NFL stats (yards, TDs, INTs, fumbles)
+- `POST /api/admin/sync-wins/?season=2025` - Auto-sync QB wins from game results
+- `POST /api/admin/weekly-stats/` - Manually add weekly stats
+- `POST /api/admin/bonuses/` - Add season bonus (MVP, Rookie of Year, etc.)
+- `POST /api/admin/playoffs/` - Add playoff appearance
+
+**Note**: All endpoints require trailing slashes to avoid redirects.
+
+## Deployment (Railway)
+
+The application is deployed on Railway with automatic CI/CD from the GitHub main branch.
+
+### Backend Service
+- **URL**: https://howellleague-production.up.railway.app
+- **Root Directory**: `backend`
+- **Database**: PostgreSQL (Railway managed)
+- **Environment Variables**:
+  - `DATABASE_URL` - Auto-set by Railway PostgreSQL plugin
+  - `FRONTEND_URL` - Set to frontend URL for CORS
+
+### Frontend Service
+- **URL**: https://dill-qb-league.up.railway.app
+- **Root Directory**: `frontend`
+- **Build Command**: `npm run build` (Vite)
+- **Start Command**: `serve dist -s --listen tcp://0.0.0.0:$PORT`
+- **Environment Variables**:
+  - `VITE_API_URL` - Set to backend URL
+
+### Deployment Notes
+- Push to `main` branch triggers automatic redeployment
+- Database migrations happen automatically on startup
+- API endpoints require trailing slashes (FastAPI requirement)
+- CORS is configured to allow frontend origin
+
+## Current Season Status (2025)
+
+- **43/48 QBs** have season stats synced from NFL
+- **190 wins** synced from game results
+- **6 teams** fully rostered
+- **Team BMOC** currently leading with 1,325.24 points
 
 ## Future Enhancements
 
-- NFL stats API integration for automatic data sync
-- Historical season tracking
-- Draft management
-- Trade processing
+- ✅ ~~NFL stats API integration~~ (Completed - using nflreadpy)
+- Historical season tracking (2024, 2023, etc.)
+- Draft management system
+- Trade processing and approval workflow
 - Mobile responsive improvements
-- User authentication
-- Real-time updates
+- User authentication and permissions
+- Real-time updates via WebSockets
+- Email notifications for standings updates
 
 ## License
 
