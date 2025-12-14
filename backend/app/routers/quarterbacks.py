@@ -29,7 +29,7 @@ def get_all_quarterbacks(season: int = 2025, db: Session = Depends(get_db)):
 
     return {"season": season, "quarterbacks": result}
 
-@router.get("/{qb_id}")
+@router.get("/{qb_id}/")
 def get_quarterback_details(qb_id: int, db: Session = Depends(get_db)):
     """
     Get detailed scoring breakdown for a quarterback.

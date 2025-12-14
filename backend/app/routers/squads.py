@@ -27,7 +27,7 @@ def get_all_squads(season: int = 2025, db: Session = Depends(get_db)):
 
     return {"season": season, "squads": result}
 
-@router.get("/{squad_id}/roster")
+@router.get("/{squad_id}/roster/")
 def get_squad_roster(squad_id: int, db: Session = Depends(get_db)):
     """
     Get a squad's roster (all QBs) with their individual points.

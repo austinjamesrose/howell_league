@@ -59,7 +59,7 @@ class PlayoffAppearanceCreate(BaseModel):
     round: str
     won_super_bowl: bool = False
 
-@router.post("/weekly-stats")
+@router.post("/weekly-stats/")
 def add_weekly_stat(stat_data: WeeklyStatCreate, db: Session = Depends(get_db)):
     """
     Add or update weekly stats for a QB.
@@ -101,7 +101,7 @@ def add_weekly_stat(stat_data: WeeklyStatCreate, db: Session = Depends(get_db)):
         "points": stat.points
     }
 
-@router.post("/bonuses")
+@router.post("/bonuses/")
 def add_season_bonus(bonus_data: SeasonBonusCreate, db: Session = Depends(get_db)):
     """
     Add a season bonus (MVP, Rookie of Year, etc.) for a QB.
@@ -148,7 +148,7 @@ def add_season_bonus(bonus_data: SeasonBonusCreate, db: Session = Depends(get_db
         "points": points
     }
 
-@router.post("/playoffs")
+@router.post("/playoffs/")
 def add_playoff_appearance(playoff_data: PlayoffAppearanceCreate, db: Session = Depends(get_db)):
     """
     Add a playoff appearance for a QB.

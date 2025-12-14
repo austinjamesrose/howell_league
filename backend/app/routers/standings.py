@@ -14,7 +14,7 @@ def get_standings(season: int = 2025, db: Session = Depends(get_db)):
     standings = StandingsService.get_league_standings(db, season)
     return {"season": season, "standings": standings}
 
-@router.get("/worst-qb")
+@router.get("/worst-qb/")
 def get_worst_qb(season: int = 2025, db: Session = Depends(get_db)):
     """
     Get the worst QB (lowest points > 0) for the season.
