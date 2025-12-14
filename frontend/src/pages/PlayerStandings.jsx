@@ -15,7 +15,9 @@ export default function PlayerStandings() {
     try {
       setLoading(true);
       const data = await api.getQuarterbacks();
-      setPlayers(data.quarterbacks);
+      // Filter to show only QBs with >0 points (rostered or unrostered)
+      const filteredPlayers = data.quarterbacks.filter(qb => qb.total_points > 0);
+      setPlayers(filteredPlayers);
     } catch (err) {
       setError('Failed to load player standings');
       console.error(err);
@@ -46,7 +48,7 @@ export default function PlayerStandings() {
         <h1 className="text-4xl font-bold text-gray-900 mb-2">
           Player Standings
         </h1>
-        <p className="text-gray-600">All rostered quarterbacks ranked by total points</p>
+        <p className="text-gray-600">All quarterbacks with points ranked by total (rostered & free agents)</p>
       </div>
 
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -72,10 +74,18 @@ export default function PlayerStandings() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {players.map((player, index) => (
+              {players.map((player, index) => {
+                const isFreeAgent = player.squad_name === 'Free Agent';
+                const rowBgClass = isFreeAgent
+                  ? 'bg-blue-50 hover:bg-blue-100'
+                  : index < 3
+                    ? 'bg-yellow-50'
+                    : 'hover:bg-gray-50';
+
+                return (
                 <tr
                   key={player.id}
-                  className={index < 3 ? 'bg-yellow-50' : 'hover:bg-gray-50'}
+                  className={rowBgClass}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-bold text-gray-900">
@@ -97,7 +107,9 @@ export default function PlayerStandings() {
                     <div className="text-sm text-gray-900">{player.nfl_team}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-700">{player.squad_name}</div>
+                    <div className="text-sm text-gray-700">
+                      {player.squad_name === 'Free Agent' ? 'FA' : player.squad_name}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="text-lg font-bold text-blue-600">
@@ -105,13 +117,14 @@ export default function PlayerStandings() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              );
+              })}
             </tbody>
           </table>
         </div>
 
         <div className="bg-gray-50 px-6 py-4 text-sm text-gray-600">
-          Showing {players.length} rostered quarterbacks
+          Showing {players.length} quarterbacks with points ({players.filter(p => p.squad_name === 'Free Agent').length} free agents)
         </div>
       </div>
     </div>
