@@ -248,3 +248,134 @@ def debug_nfl_columns(season: int = 2024):
         }
     except Exception as e:
         return {"error": str(e)}
+
+@router.post("/seed-database/")
+def seed_database(season: int = 2025, db: Session = Depends(get_db)):
+    """
+    ONE-TIME SETUP: Seeds the database with teams and QBs.
+    WARNING: This clears existing data!
+    """
+    from app.models.models import Squad
+
+    # Check if already seeded
+    existing_squads = db.query(Squad).filter(Squad.season == season).count()
+    if existing_squads > 0:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Database already has {existing_squads} squads for {season}. Delete them first if you want to re-seed."
+        )
+
+    # Roster data
+    rosters = {
+        "Team AP": {
+            "owner": "Austin Poncelet",
+            "qbs": [
+                {"name": "Justin Herbert", "nfl_team": "LAC"},
+                {"name": "Russell Wilson", "nfl_team": "NYG"},
+                {"name": "Baker Mayfield", "nfl_team": "TB"},
+                {"name": "Tua Tagovailoa", "nfl_team": "MIA"},
+                {"name": "C.J. Stroud", "nfl_team": "HOU"},
+                {"name": "Joe Flacco", "nfl_team": "CIN"},
+                {"name": "Bo Nix", "nfl_team": "DEN"},
+                {"name": "Jameis Winston", "nfl_team": "NYG"},
+            ]
+        },
+        "Team Jar-Jar": {
+            "owner": "Brad Foster",
+            "qbs": [
+                {"name": "Patrick Mahomes", "nfl_team": "KC"},
+                {"name": "Kirk Cousins", "nfl_team": "ATL"},
+                {"name": "Jalen Hurts", "nfl_team": "PHI"},
+                {"name": "Kyle McCord", "nfl_team": "PHI"},
+                {"name": "Trevor Lawrence", "nfl_team": "JAX"},
+                {"name": "Brock Purdy", "nfl_team": "SF"},
+                {"name": "Michael Penix Jr.", "nfl_team": "ATL"},
+                {"name": "Jaxson Dart", "nfl_team": "NYG"},
+            ]
+        },
+        "Team Mojo": {
+            "owner": "Marc Orlando",
+            "qbs": [
+                {"name": "Josh Allen", "nfl_team": "BUF"},
+                {"name": "Justin Fields", "nfl_team": "NYJ"},
+                {"name": "Geno Smith", "nfl_team": "SEA"},
+                {"name": "Cam Ward", "nfl_team": "TEN"},
+                {"name": "Drake Maye", "nfl_team": "NE"},
+                {"name": "Shedeur Sanders", "nfl_team": "CLE"},
+                {"name": "Deshaun Watson", "nfl_team": "CLE"},
+                {"name": "Mason Rudolph", "nfl_team": "PIT"},
+            ]
+        },
+        "Team BMOC": {
+            "owner": "Sean McLaughlin",
+            "qbs": [
+                {"name": "Bryce Young", "nfl_team": "CAR"},
+                {"name": "Matthew Stafford", "nfl_team": "LAR"},
+                {"name": "Aaron Rodgers", "nfl_team": "NYJ"},
+                {"name": "Quinn Ewers", "nfl_team": "MIA"},
+                {"name": "Sam Darnold", "nfl_team": "SEA"},
+                {"name": "Tyler Shough", "nfl_team": "NO"},
+                {"name": "Caleb Williams", "nfl_team": "CHI"},
+                {"name": "Spencer Rattler", "nfl_team": "NO"},
+            ]
+        },
+        "Team TK": {
+            "owner": "Tyler Krieger",
+            "qbs": [
+                {"name": "Joe Burrow", "nfl_team": "CIN"},
+                {"name": "Lamar Jackson", "nfl_team": "BAL"},
+                {"name": "Will Levis", "nfl_team": "TEN"},
+                {"name": "Jared Goff", "nfl_team": "DET"},
+                {"name": "Daniel Jones", "nfl_team": "IND"},
+                {"name": "Dillon Gabriel", "nfl_team": "CLE"},
+                {"name": "Derek Carr", "nfl_team": "NO"},
+                {"name": "J.J. McCarthy", "nfl_team": "MIN"},
+            ]
+        },
+        "Team Rose": {
+            "owner": "Austin Rose",
+            "qbs": [
+                {"name": "Dak Prescott", "nfl_team": "DAL"},
+                {"name": "Kyler Murray", "nfl_team": "ARI"},
+                {"name": "Anthony Richardson", "nfl_team": "IND"},
+                {"name": "Jordan Love", "nfl_team": "GB"},
+                {"name": "Joe Milton III", "nfl_team": "DAL"},
+                {"name": "Jayden Daniels", "nfl_team": "WAS"},
+                {"name": "Jalen Milroe", "nfl_team": "SEA"},
+                {"name": "Will Howard", "nfl_team": "PIT"},
+            ]
+        },
+    }
+
+    # Create squads and QBs
+    total_qbs = 0
+    for squad_name, squad_data in rosters.items():
+        squad = Squad(
+            name=squad_name,
+            owner=squad_data["owner"],
+            season=season
+        )
+        db.add(squad)
+        db.flush()  # Get the squad ID
+
+        for qb_data in squad_data["qbs"]:
+            qb = Quarterback(
+                name=qb_data["name"],
+                nfl_team=qb_data["nfl_team"],
+                squad_id=squad.id,
+                season=season
+            )
+            db.add(qb)
+            total_qbs += 1
+
+    db.commit()
+
+    return {
+        "message": f"Database seeded successfully for {season} season!",
+        "squads_created": len(rosters),
+        "qbs_created": total_qbs,
+        "next_steps": [
+            "Visit /api/admin/sync-stats/ to sync NFL stats",
+            "Visit /api/admin/sync-wins/ to sync QB wins"
+        ]
+    }
