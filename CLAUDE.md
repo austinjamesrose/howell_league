@@ -1,5 +1,45 @@
 # Howell League - Development Log
 
+## 🚨 CURRENT STATUS (December 13, 2025)
+
+### ✅ What's Working:
+- **Backend deployed on Railway**: https://howellleague-production.up.railway.app
+  - API endpoints working ✅
+  - PostgreSQL database connected ✅
+  - 6 teams seeded ✅
+  - 48 QBs seeded ✅
+  - NFL stats synced (43/48 QBs) ✅
+  - QB wins synced (190 wins) ✅
+
+- **Frontend deployed on Railway**: https://dill-qb-league.up.railway.app
+  - Site loads ✅
+  - React app running ✅
+
+### ❌ BLOCKING ISSUE:
+**CORS Error** - Frontend cannot communicate with backend
+
+**Error Message:**
+```
+Access to fetch at 'https://howellleague-production.up.railway.app/api/standings/'
+from origin 'https://dill-qb-league.up.railway.app' has been blocked by CORS policy:
+No 'Access-Control-Allow-Origin' header is present on the requested resource.
+```
+
+**What We've Tried:**
+1. ✅ Added FRONTEND_URL environment variable to backend
+2. ✅ Hardcoded frontend URL in CORS allowed_origins
+3. ✅ Verified backend is responding (curl works)
+4. ❌ CORS still blocking despite configuration
+
+**Next Steps to Debug:**
+1. Check Railway backend logs to verify CORS middleware is loading
+2. Verify the backend redeployment actually picked up the code changes
+3. Test CORS with a simple curl command to see what headers are returned
+4. Consider adding wildcard CORS temporarily to isolate issue
+5. Check if there's a Railway-specific CORS configuration needed
+
+---
+
 ## Project Overview
 A web application for managing the Howell League - a QB-only fantasy football league with custom scoring rules.
 
@@ -392,3 +432,191 @@ pyarrow
 3. Consider adding a dashboard showing sync status and last sync time
 4. Add draft management features
 5. Add trade processing functionality
+## Railway Deployment Details (December 13, 2025)
+
+### Backend Service Configuration
+- **Service Name**: howell_league (backend)
+- **URL**: https://howellleague-production.up.railway.app
+- **Root Directory**: `backend`
+- **Database**: PostgreSQL (Railway managed)
+- **Python Version**: 3.13.11 (auto-detected by Nixpacks)
+- **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+
+**Environment Variables:**
+- `DATABASE_URL`: (auto-set by Railway PostgreSQL)
+- `FRONTEND_URL`: `https://dill-qb-league.up.railway.app`
+
+**Dependencies Fixed:**
+- Upgraded SQLAlchemy: 2.0.23 → 2.0.36 (Python 3.13 compatibility)
+- Upgraded FastAPI: 0.104.1 → 0.115.0
+- Upgraded Uvicorn: 0.24.0 → 0.32.0
+- Upgraded psycopg2-binary: 2.9.9 → 2.9.11 (Python 3.13 compatibility)
+- Added pandas (required by nflreadpy)
+
+### Frontend Service Configuration
+- **Service Name**: frontend
+- **URL**: https://dill-qb-league.up.railway.app
+- **Root Directory**: `frontend/` (with trailing slash in Railway)
+- **Node Version**: 20+ (specified in package.json engines)
+- **Start Command**: `npm start` (runs `serve dist -s --listen tcp://0.0.0.0:$PORT`)
+
+**Environment Variables:**
+- `VITE_API_URL`: `https://howellleague-production.up.railway.app`
+
+**Dependencies Added:**
+- `serve@14.2.1` (static file server for production)
+
+**Critical Fix:**
+- Removed custom Port 4173 setting in Railway
+- Allows Railway to use auto-detected PORT environment variable
+- Serve binds to 0.0.0.0:$PORT (not localhost)
+
+### PostgreSQL Database
+- **Service Name**: PostgreSQL
+- **Connection**: Linked to backend service via DATABASE_URL
+- **Data Seeded**: Via `/api/admin/seed-database/` endpoint
+- **Contents**: 6 teams, 48 QBs, 2025 season stats
+
+### Deployment Challenges Solved
+
+#### 1. Python 3.13 Compatibility
+**Problem**: Railway auto-detected Python 3.13, but SQLAlchemy 2.0.23 was incompatible
+**Error**: `AssertionError: Class directly inherits TypingOnly but has additional attributes`
+**Solution**: Upgraded SQLAlchemy to 2.0.36, FastAPI to 0.115.0, Uvicorn to 0.32.0
+
+#### 2. psycopg2-binary Compatibility
+**Problem**: psycopg2-binary 2.9.9 incompatible with Python 3.13
+**Error**: `ImportError: undefined symbol: _PyInterpreterState_Get`
+**Solution**: Upgraded to psycopg2-binary 2.9.11
+
+#### 3. Missing pandas Dependency
+**Problem**: nflreadpy calls `.to_pandas()` but pandas wasn't in requirements
+**Error**: `No module named 'pandas'`
+**Solution**: Added pandas to requirements.txt
+
+#### 4. Frontend Package Lock Out of Sync
+**Problem**: Added `serve` to package.json but didn't update package-lock.json
+**Error**: `npm ci` failed - "Missing: serve@14.2.5 from lock file"
+**Solution**: Ran `npm install` locally to update package-lock.json, committed both files
+
+#### 5. Node Version Mismatch
+**Problem**: Railway using Node 18, but Vite 7 requires Node 20+
+**Error**: `EBADENGINE Unsupported engine`
+**Solution**: Added `"engines": { "node": ">=20.0.0" }` to package.json
+
+#### 6. Frontend "Application Failed to Respond"
+**Problem**: Serve listening on localhost:8080 instead of 0.0.0.0
+**Symptom**: Container starts but Railway can't reach it (502 errors)
+**Debug**: Logs showed "Accepting connections at http://localhost:8080"
+**Solution**: Changed serve command from `-l $PORT` to `--listen tcp://0.0.0.0:$PORT`
+
+#### 7. Port 4173 Configuration Issue
+**Problem**: Railway had custom Port 4173 setting (Vite's default)
+**Issue**: Serve was listening on $PORT (8080) but Railway expected 4173
+**Solution**: Removed custom port setting in Railway → Networking settings
+
+#### 8. CORS Blocking (CURRENT ISSUE - UNRESOLVED)
+**Problem**: Frontend can load but cannot call backend API
+**Error**: `No 'Access-Control-Allow-Origin' header is present`
+**Attempted Fixes**:
+  - Set FRONTEND_URL environment variable
+  - Hardcoded frontend URL in allowed_origins list
+  - Verified backend responds to curl requests
+**Status**: Backend returns some CORS headers but not Allow-Origin
+**Current Code** (backend/app/main.py lines 20-33):
+```python
+allowed_origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://dill-qb-league.up.railway.app"  # Hardcoded
+]
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url and frontend_url not in allowed_origins:
+    allowed_origins.append(frontend_url)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+### How to Continue Debugging CORS:
+
+1. **Verify latest deployment picked up changes:**
+   ```bash
+   curl -I -H "Origin: https://dill-qb-league.up.railway.app" \
+     https://howellleague-production.up.railway.app/api/standings/
+   ```
+   Should return: `access-control-allow-origin: https://dill-qb-league.up.railway.app`
+
+2. **Check Railway backend logs** for FastAPI startup:
+   - Look for "Application startup complete"
+   - Verify no errors during middleware initialization
+
+3. **Try wildcard CORS temporarily** (for debugging only):
+   ```python
+   allow_origins=["*"]  # Temporary - REMOVE after debugging
+   ```
+
+4. **Verify FRONTEND_URL in backend:**
+   - Railway → Backend Service → Variables
+   - Should be: `https://dill-qb-league.up.railway.app` (NO trailing slash)
+
+5. **Check if Railway requires special CORS config:**
+   - Some platforms need additional configuration for CORS
+   - Check Railway documentation for FastAPI CORS
+
+### Useful Commands
+
+**Test backend API:**
+```bash
+curl https://howellleague-production.up.railway.app/api/standings/
+```
+
+**Test CORS headers:**
+```bash
+curl -I -H "Origin: https://dill-qb-league.up.railway.app" \
+  https://howellleague-production.up.railway.app/api/standings/
+```
+
+**Sync NFL stats:**
+```bash
+curl -X POST "https://howellleague-production.up.railway.app/api/admin/sync-stats/?season=2025"
+curl -X POST "https://howellleague-production.up.railway.app/api/admin/sync-wins/?season=2025"
+```
+
+**Railway CLI:**
+```bash
+# Check service status
+cd backend && railway status
+
+# View logs
+railway logs
+
+# Get domain
+railway domain
+```
+
+### Files Modified for Deployment
+
+**Backend:**
+- `backend/requirements.txt` - Updated dependencies
+- `backend/app/database/config.py` - Added PostgreSQL support
+- `backend/app/main.py` - Updated CORS configuration
+- `backend/app/routers/admin.py` - Added seed-database endpoint
+- `backend/railway.toml` - Deployment configuration
+
+**Frontend:**
+- `frontend/package.json` - Added serve, Node version, start script
+- `frontend/package-lock.json` - Updated with serve dependencies
+- `frontend/src/services/api.js` - Use VITE_API_URL environment variable
+- `frontend/railway.toml` - Deployment configuration
+
+### Tech Stack Updates
+- **Backend Database**: SQLite (local) → PostgreSQL (Railway production)
+- **Frontend Build**: Vite dev server (local) → serve static files (Railway production)
+- **Deployment Platform**: Railway (both frontend and backend)
+
