@@ -19,9 +19,13 @@ app = FastAPI(
 
 # Configure CORS for frontend
 # Allow Railway frontend URL from environment variable
-allowed_origins = ["http://localhost:5173", "http://localhost:3000"]
+allowed_origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://dill-qb-league.up.railway.app"
+]
 frontend_url = os.getenv("FRONTEND_URL")
-if frontend_url:
+if frontend_url and frontend_url not in allowed_origins:
     allowed_origins.append(frontend_url)
 
 app.add_middleware(
