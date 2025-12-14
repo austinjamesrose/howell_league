@@ -2,5 +2,5 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "node_modules/.bin/serve dist -s -l $PORT"
+startCommand = "npm start"
 restartPolicyType = "ON_FAILURE"
