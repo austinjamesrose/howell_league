@@ -15,8 +15,10 @@ export default function PlayerStandings() {
     try {
       setLoading(true);
       const data = await api.getQuarterbacks();
-      // Filter to show only QBs with >0 points (rostered or unrostered)
-      const filteredPlayers = data.quarterbacks.filter(qb => qb.total_points > 0);
+      // Show all rostered QBs (even with 0 points) + free agents with >0 points
+      const filteredPlayers = data.quarterbacks.filter(qb =>
+        qb.squad_name !== 'Free Agent' || qb.total_points > 0
+      );
       setPlayers(filteredPlayers);
     } catch (err) {
       setError('Failed to load player standings');
