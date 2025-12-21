@@ -5,6 +5,8 @@ import Rosters from './pages/Rosters';
 import PlayerStandings from './pages/PlayerStandings';
 import QBDetails from './pages/QBDetails';
 import Admin from './pages/Admin';
+import AllTimeMoney from './pages/AllTimeMoney';
+import LeagueRules from './pages/LeagueRules';
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
           <Route path="players" element={<PlayerStandings />} />
           <Route path="qb/:qbId" element={<QBDetails />} />
           <Route path="admin" element={<Admin />} />
+          <Route path="all-time" element={<AllTimeMoney />} />
+          <Route path="rules" element={<LeagueRules />} />
         </Route>
       </Routes>
     </Router>

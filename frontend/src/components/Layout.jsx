@@ -8,6 +8,8 @@ export default function Layout() {
     { to: '/', label: 'Standings' },
     { to: '/rosters', label: 'Rosters' },
     { to: '/players', label: 'Players' },
+    { to: '/all-time', label: 'All-Time $' },
+    { to: '/rules', label: 'Rules' },
     { to: '/admin', label: 'Admin' },
   ];
 

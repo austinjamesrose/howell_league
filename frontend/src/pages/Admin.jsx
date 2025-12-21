@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 export default function Admin() {
   // Authentication state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -69,7 +71,7 @@ export default function Admin() {
     setAuthError('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/admin/verify-password/', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/verify-password/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
