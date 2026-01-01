@@ -22,7 +22,8 @@ app = FastAPI(
 allowed_origins = [
     "http://localhost:5173",
     "http://localhost:3000",
-    "https://dill-qb-league.up.railway.app"
+    "https://dill-qb-league.up.railway.app",
+    "https://qbleague.xyz"
 ]
 frontend_url = os.getenv("FRONTEND_URL")
 if frontend_url and frontend_url not in allowed_origins:
