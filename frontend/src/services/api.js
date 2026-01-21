@@ -81,4 +81,11 @@ export const api = {
     });
     return response.json();
   },
+
+  syncPlayoffs: async (season = 2025) => {
+    const response = await fetch(`${API_BASE_URL}/api/admin/sync-playoffs/?season=${season}`, {
+      method: 'POST',
+    });
+    return response.json();
+  },
 };

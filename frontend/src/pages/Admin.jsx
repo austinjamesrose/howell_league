@@ -191,6 +191,26 @@ export default function Admin() {
     }
   };
 
+  const handleSyncPlayoffs = async (e) => {
+    e.preventDefault();
+    try {
+      setSyncing(true);
+      setMessage({ type: 'info', text: `Syncing playoff appearances for ${syncForm.season}...` });
+      const result = await api.syncPlayoffs(syncForm.season);
+      setMessage({
+        type: 'success',
+        text: `${result.message} - Appearances synced: ${result.total_appearances_synced} (${result.playoff_games_checked} playoff games checked)`
+      });
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text: 'Failed to sync playoffs. Make sure the season data is available.'
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   // Show login screen if not authenticated
   if (!isAuthenticated) {
     return (
@@ -365,15 +385,29 @@ export default function Admin() {
                 {syncing ? 'Syncing...' : '🏆 Sync QB Wins from Game Results'}
               </button>
 
+              <button
+                type="button"
+                onClick={handleSyncPlayoffs}
+                disabled={syncing}
+                className={`w-full py-3 rounded-lg font-medium ${
+                  syncing
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-purple-600 hover:bg-purple-700 text-white'
+                }`}
+              >
+                {syncing ? 'Syncing...' : '🏈 Sync Playoff Appearances'}
+              </button>
+
               <div className="mt-4 p-4 bg-gray-50 rounded border border-gray-200">
                 <h4 className="font-semibold text-gray-900 mb-2">How it works:</h4>
                 <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
                   <li><strong>Sync Stats:</strong> Fetches season aggregate stats (yards, TDs, INTs, fumbles)</li>
                   <li><strong>Sync Wins:</strong> Credits wins to starting QBs (3 pts regular, 4 pts prime time)</li>
-                  <li>Both update automatically as the season progresses</li>
-                  <li>Only starting QBs receive win credit</li>
-                  <li>Prime time = games starting at 5 PM or later</li>
-                  <li>Bonuses and playoff data still require manual entry</li>
+                  <li><strong>Sync Playoffs:</strong> Credits playoff appearances (WC: 3, DIV: 6, CON: 10, SB: 15+25 if won)</li>
+                  <li>All syncs update automatically as games complete</li>
+                  <li>Only starting QBs receive credit</li>
+                  <li>Safe to run multiple times (won't create duplicates)</li>
+                  <li>Bonuses (MVP, ROY, etc.) still require manual entry</li>
                 </ul>
               </div>
             </form>
