@@ -195,11 +195,11 @@ export default function Admin() {
     e.preventDefault();
     try {
       setSyncing(true);
-      setMessage({ type: 'info', text: `Syncing playoff appearances for ${syncForm.season}...` });
+      setMessage({ type: 'info', text: `Syncing playoff wins for ${syncForm.season}...` });
       const result = await api.syncPlayoffs(syncForm.season);
       setMessage({
         type: 'success',
-        text: `${result.message} - Appearances synced: ${result.total_appearances_synced} (${result.playoff_games_checked} playoff games checked)`
+        text: `${result.message} - Wins synced: ${result.total_wins_synced} (${result.playoff_games_checked} playoff games checked)`
       });
     } catch (err) {
       setMessage({
@@ -395,7 +395,7 @@ export default function Admin() {
                     : 'bg-purple-600 hover:bg-purple-700 text-white'
                 }`}
               >
-                {syncing ? 'Syncing...' : '🏈 Sync Playoff Appearances'}
+                {syncing ? 'Syncing...' : '🏈 Sync Playoff Wins'}
               </button>
 
               <div className="mt-4 p-4 bg-gray-50 rounded border border-gray-200">
@@ -403,7 +403,7 @@ export default function Admin() {
                 <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
                   <li><strong>Sync Stats:</strong> Fetches season aggregate stats (yards, TDs, INTs, fumbles)</li>
                   <li><strong>Sync Wins:</strong> Credits wins to starting QBs (3 pts regular, 4 pts prime time)</li>
-                  <li><strong>Sync Playoffs:</strong> Credits playoff appearances (WC: 3, DIV: 6, CON: 10, SB: 15+25 if won)</li>
+                  <li><strong>Sync Playoffs:</strong> Credits playoff WINS (WC: 3, DIV: 6, CON: 10, SB: 15+25)</li>
                   <li>All syncs update automatically as games complete</li>
                   <li>Only starting QBs receive credit</li>
                   <li>Safe to run multiple times (won't create duplicates)</li>

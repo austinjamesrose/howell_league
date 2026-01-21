@@ -231,21 +231,21 @@ def sync_qb_wins(season: int = 2025, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Failed to sync wins: {str(e)}")
 
 @router.post("/sync-playoffs/")
-def sync_playoff_appearances(season: int = 2025, db: Session = Depends(get_db)):
+def sync_playoff_wins(season: int = 2025, db: Session = Depends(get_db)):
     """
-    Sync playoff appearances from NFL game results.
-    Creates PlayoffAppearance entries for QBs who played in each round.
+    Sync playoff WINS from NFL game results.
+    Creates PlayoffAppearance entries for QBs who WON in each round.
 
-    Points (cumulative per round):
+    Points per playoff WIN:
     - Wild Card: 3 points
     - Divisional: 6 points
     - Conference Championship: 10 points
-    - Super Bowl: 15 points (+25 if won)
+    - Super Bowl: 15 points (+25 bonus)
     """
     try:
         result = NFLStatsService.sync_playoff_appearances(db, season)
         return {
-            "message": f"Successfully synced playoff appearances for {season}",
+            "message": f"Successfully synced playoff wins for {season}",
             **result
         }
     except Exception as e:

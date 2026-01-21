@@ -250,21 +250,21 @@ class NFLStatsService:
     @staticmethod
     def sync_playoff_appearances(db: Session, season: int) -> Dict:
         """
-        Sync playoff appearances from NFL schedule/game results.
-        Creates PlayoffAppearance entries for QBs who played in each round.
+        Sync playoff WINS from NFL schedule/game results.
+        Creates PlayoffAppearance entries for QBs who WON in each round.
 
-        Points are cumulative per round:
+        Points per playoff WIN:
         - Wild Card: 3 points
         - Divisional: 6 points
         - Conference Championship: 10 points
-        - Super Bowl: 15 points (+25 if won)
+        - Super Bowl: 15 points (+25 bonus for winning)
 
         Args:
             db: Database session
             season: Season year
 
         Returns:
-            Summary of synced playoff appearances
+            Summary of synced playoff wins
         """
         # Load schedule data for the season
         schedules = nfl.load_schedules(seasons=[season])
@@ -288,9 +288,9 @@ class NFLStatsService:
         rostered_qbs = db.query(Quarterback).filter(Quarterback.season == season).all()
         qb_map = {qb.name: qb for qb in rostered_qbs}
 
-        appearances_synced = 0
-        appearances_created = 0
-        appearances_skipped = 0
+        wins_synced = 0
+        wins_created = 0
+        wins_skipped = 0
 
         for _, game in playoff_games.iterrows():
             game_type = game['game_type']
@@ -301,56 +301,55 @@ class NFLStatsService:
 
             home_score = game['home_score']
             away_score = game['away_score']
-            home_qb = game['home_qb_name']
-            away_qb = game['away_qb_name']
 
-            # Determine Super Bowl winner if applicable
-            home_won_sb = (game_type == 'SB' and home_score > away_score)
-            away_won_sb = (game_type == 'SB' and away_score > home_score)
+            # Determine the winning QB only
+            if home_score > away_score:
+                winning_qb_name = game['home_qb_name']
+            elif away_score > home_score:
+                winning_qb_name = game['away_qb_name']
+            else:
+                # Tie (shouldn't happen in playoffs)
+                continue
 
-            # Process both QBs in the game (both teams appeared in this round)
-            for qb_name, won_super_bowl in [(home_qb, home_won_sb), (away_qb, away_won_sb)]:
-                if not qb_name or qb_name not in qb_map:
-                    continue
+            # Check if winning QB is on our roster
+            if not winning_qb_name or winning_qb_name not in qb_map:
+                continue
 
-                qb = qb_map[qb_name]
+            qb = qb_map[winning_qb_name]
 
-                # Check if playoff appearance already exists
-                existing = db.query(PlayoffAppearance).filter(
-                    PlayoffAppearance.qb_id == qb.id,
-                    PlayoffAppearance.season == season,
-                    PlayoffAppearance.round == playoff_round
-                ).first()
+            # Super Bowl win gets the extra 25 point bonus
+            won_super_bowl = (playoff_round == PlayoffRound.SUPER_BOWL)
 
-                if existing:
-                    # Update Super Bowl win status if needed
-                    if playoff_round == PlayoffRound.SUPER_BOWL and won_super_bowl and not existing.won_super_bowl:
-                        existing.won_super_bowl = True
-                        existing.points = ScoringEngine.get_playoff_points(playoff_round, True)
-                        appearances_synced += 1
-                    else:
-                        appearances_skipped += 1
-                    continue
+            # Check if playoff win already exists
+            existing = db.query(PlayoffAppearance).filter(
+                PlayoffAppearance.qb_id == qb.id,
+                PlayoffAppearance.season == season,
+                PlayoffAppearance.round == playoff_round
+            ).first()
 
-                # Create new playoff appearance
-                points = ScoringEngine.get_playoff_points(playoff_round, won_super_bowl)
-                appearance = PlayoffAppearance(
-                    qb_id=qb.id,
-                    season=season,
-                    round=playoff_round,
-                    won_super_bowl=won_super_bowl,
-                    points=points
-                )
-                db.add(appearance)
-                appearances_created += 1
-                appearances_synced += 1
+            if existing:
+                wins_skipped += 1
+                continue
+
+            # Create new playoff win entry
+            points = ScoringEngine.get_playoff_points(playoff_round, won_super_bowl)
+            appearance = PlayoffAppearance(
+                qb_id=qb.id,
+                season=season,
+                round=playoff_round,
+                won_super_bowl=won_super_bowl,
+                points=points
+            )
+            db.add(appearance)
+            wins_created += 1
+            wins_synced += 1
 
         db.commit()
 
         return {
             "season": season,
-            "total_appearances_synced": appearances_synced,
-            "created": appearances_created,
-            "skipped_existing": appearances_skipped,
+            "total_wins_synced": wins_synced,
+            "created": wins_created,
+            "skipped_existing": wins_skipped,
             "playoff_games_checked": len(playoff_games)
         }
