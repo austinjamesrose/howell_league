@@ -168,7 +168,7 @@ export default function QBDetails() {
         {qb.breakdown.playoffs.appearances.length > 0 && (
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Playoff Appearances
+              Playoff Wins
             </h2>
             <div className="space-y-2">
               {qb.breakdown.playoffs.appearances.map((playoff, idx) => (
