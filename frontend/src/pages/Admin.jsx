@@ -211,6 +211,30 @@ export default function Admin() {
     }
   };
 
+  const handleSeedAwards = async (e) => {
+    e.preventDefault();
+    try {
+      setSyncing(true);
+      setMessage({ type: 'info', text: `Seeding POW/POM awards for ${syncForm.season}...` });
+      const result = await api.seedAwards(syncForm.season);
+      const teamBreakdown = Object.entries(result.points_by_team)
+        .sort((a, b) => b[1] - a[1])
+        .map(([team, pts]) => `${team}: +${pts}`)
+        .join(', ');
+      setMessage({
+        type: 'success',
+        text: `${result.message} - POW: ${result.pow_awards} (${result.pow_points} pts), POM: ${result.pom_awards} (${result.pom_points} pts). By team: ${teamBreakdown}`
+      });
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text: 'Failed to seed awards. Make sure the database has QBs loaded.'
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   // Show login screen if not authenticated
   if (!isAuthenticated) {
     return (
@@ -398,16 +422,30 @@ export default function Admin() {
                 {syncing ? 'Syncing...' : '🏈 Sync Playoff Wins'}
               </button>
 
+              <button
+                type="button"
+                onClick={handleSeedAwards}
+                disabled={syncing}
+                className={`w-full py-3 rounded-lg font-medium ${
+                  syncing
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                }`}
+              >
+                {syncing ? 'Seeding...' : '🏅 Seed POW/POM Awards'}
+              </button>
+
               <div className="mt-4 p-4 bg-gray-50 rounded border border-gray-200">
                 <h4 className="font-semibold text-gray-900 mb-2">How it works:</h4>
                 <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
                   <li><strong>Sync Stats:</strong> Fetches season aggregate stats (yards, TDs, INTs, fumbles)</li>
                   <li><strong>Sync Wins:</strong> Credits wins to starting QBs (3 pts regular, 4 pts prime time)</li>
                   <li><strong>Sync Playoffs:</strong> Credits playoff WINS (WC: 3, DIV: 6, CON: 10, SB: 15+25)</li>
+                  <li><strong>Seed Awards:</strong> Adds Player of Week (10 pts) and Player of Month (20 pts) bonuses</li>
                   <li>All syncs update automatically as games complete</li>
                   <li>Only starting QBs receive credit</li>
                   <li>Safe to run multiple times (won't create duplicates)</li>
-                  <li>Bonuses (MVP, ROY, etc.) still require manual entry</li>
+                  <li>MVP, ROY bonuses still require manual entry</li>
                 </ul>
               </div>
             </form>

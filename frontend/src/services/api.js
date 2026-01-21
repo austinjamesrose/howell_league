@@ -88,4 +88,11 @@ export const api = {
     });
     return response.json();
   },
+
+  seedAwards: async (season = 2025) => {
+    const response = await fetch(`${API_BASE_URL}/api/admin/seed-awards/?season=${season}`, {
+      method: 'POST',
+    });
+    return response.json();
+  },
 };

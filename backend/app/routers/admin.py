@@ -251,6 +251,116 @@ def sync_playoff_wins(season: int = 2025, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to sync playoffs: {str(e)}")
 
+@router.post("/seed-awards/")
+def seed_awards(season: int = 2025, db: Session = Depends(get_db)):
+    """
+    Seed Player of the Week and Player of the Month awards for the season.
+    Data sourced from Pro-Football-Reference.com.
+
+    Only affects CONF_POW and CONF_POM bonuses - does NOT touch other stats.
+    Safe to run multiple times (clears and re-adds POW/POM awards).
+    """
+    # Players of the Week - 10 points each (CONF_POW)
+    # Only includes QBs that are on league rosters
+    players_of_week = [
+        # AFC
+        {"name": "Josh Allen", "week": 1},
+        {"name": "Josh Allen", "week": 11},
+        {"name": "Josh Allen", "week": 14},
+        {"name": "Patrick Mahomes", "week": 4},
+        {"name": "Patrick Mahomes", "week": 6},
+        {"name": "C.J. Stroud", "week": 5},
+        {"name": "Lamar Jackson", "week": 9},
+        {"name": "Drake Maye", "week": 13},
+        {"name": "Trevor Lawrence", "week": 15},
+        {"name": "Joe Burrow", "week": 16},
+        # NFC
+        {"name": "J.J. McCarthy", "week": 1},
+        {"name": "Jared Goff", "week": 2},
+        {"name": "Caleb Williams", "week": 3},
+        {"name": "Jordan Love", "week": 8},
+        {"name": "Jordan Love", "week": 13},
+        {"name": "Bryce Young", "week": 11},
+        {"name": "Brock Purdy", "week": 16},
+        {"name": "Matthew Stafford", "week": 18},
+    ]
+
+    # Players of the Month - 20 points each (CONF_POM)
+    players_of_month = [
+        {"name": "Trevor Lawrence", "month": "December"},
+        {"name": "Matthew Stafford", "month": "November"},
+        {"name": "Matthew Stafford", "month": "December"},
+    ]
+
+    # Clear existing POW/POM bonuses for the season
+    db.query(SeasonBonus).filter(
+        SeasonBonus.season == season,
+        SeasonBonus.bonus_type.in_([BonusType.CONF_POW, BonusType.CONF_POM])
+    ).delete(synchronize_session=False)
+    db.commit()
+
+    pow_count = 0
+    pom_count = 0
+    pow_points = 0
+    pom_points = 0
+    team_points = {}
+
+    # Add Players of the Week
+    for award in players_of_week:
+        qb = db.query(Quarterback).filter(
+            Quarterback.name == award["name"],
+            Quarterback.season == season
+        ).first()
+
+        if qb:
+            bonus = SeasonBonus(
+                qb_id=qb.id,
+                season=season,
+                bonus_type=BonusType.CONF_POW,
+                points=10.0
+            )
+            db.add(bonus)
+            pow_count += 1
+            pow_points += 10
+
+            if qb.squad:
+                team_points[qb.squad.name] = team_points.get(qb.squad.name, 0) + 10
+
+    # Add Players of the Month
+    for award in players_of_month:
+        qb = db.query(Quarterback).filter(
+            Quarterback.name == award["name"],
+            Quarterback.season == season
+        ).first()
+
+        if qb:
+            bonus = SeasonBonus(
+                qb_id=qb.id,
+                season=season,
+                bonus_type=BonusType.CONF_POM,
+                points=20.0
+            )
+            db.add(bonus)
+            pom_count += 1
+            pom_points += 20
+
+            if qb.squad:
+                team_points[qb.squad.name] = team_points.get(qb.squad.name, 0) + 20
+
+    db.commit()
+
+    return {
+        "message": f"Awards seeded successfully for {season}",
+        "pow_awards": pow_count,
+        "pow_points": pow_points,
+        "pom_awards": pom_count,
+        "pom_points": pom_points,
+        "total_awards": pow_count + pom_count,
+        "total_points": pow_points + pom_points,
+        "points_by_team": team_points
+    }
+
+
 @router.get("/debug-nfl-columns/")
 def debug_nfl_columns(season: int = 2024):
     """
