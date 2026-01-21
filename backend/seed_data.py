@@ -1,5 +1,5 @@
 """
-Seed script to populate the database with actual 2024 season rosters.
+Seed script to populate the database with 2025 season rosters.
 """
 from app.database.config import SessionLocal, engine
 from app.models.models import Base, Squad, Quarterback, WeeklyStat

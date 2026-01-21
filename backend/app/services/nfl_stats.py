@@ -14,6 +14,21 @@ class NFLStatsService:
     """
 
     @staticmethod
+    def _get_qb_name_map(db: Session, season: int) -> Dict[str, Quarterback]:
+        """
+        Load rostered QBs and return a name->QB mapping.
+
+        Args:
+            db: Database session
+            season: Season year
+
+        Returns:
+            Dictionary mapping QB names to Quarterback objects
+        """
+        rostered_qbs = db.query(Quarterback).filter(Quarterback.season == season).all()
+        return {qb.name: qb for qb in rostered_qbs}
+
+    @staticmethod
     def fetch_season_stats(season: int):
         """
         Fetch season aggregate stats for all QBs from NFL data.
@@ -50,12 +65,8 @@ class NFLStatsService:
         # Filter to only QBs
         season_data = season_data[season_data['position'] == 'QB']
 
-        # Get all our rostered QBs
-        rostered_qbs = db.query(Quarterback).filter(Quarterback.season == season).all()
-
-        # Create a mapping of QB names to our QB records
-        # Need to handle name matching - try both player_name and player_display_name
-        qb_map = {qb.name: qb for qb in rostered_qbs}
+        # Get rostered QB name mapping
+        qb_map = NFLStatsService._get_qb_name_map(db, season)
 
         stats_synced = 0
         stats_updated = 0
@@ -162,9 +173,8 @@ class NFLStatsService:
             (schedules_df['game_type'] == 'REG')
         ]
 
-        # Get all our rostered QBs
-        rostered_qbs = db.query(Quarterback).filter(Quarterback.season == season).all()
-        qb_map = {qb.name: qb for qb in rostered_qbs}
+        # Get rostered QB name mapping
+        qb_map = NFLStatsService._get_qb_name_map(db, season)
 
         wins_synced = 0
         wins_created = 0
@@ -199,8 +209,8 @@ class NFLStatsService:
                 try:
                     hour = int(str(game['gametime']).split(':')[0])
                     is_prime_time = hour >= 17  # 5 PM or later
-                except:
-                    pass
+                except (ValueError, TypeError, AttributeError):
+                    pass  # Invalid time format, default to non-prime time
 
             # Check if we already have a stat for this week
             existing_stat = db.query(WeeklyStat).filter(
@@ -284,9 +294,8 @@ class NFLStatsService:
             (schedules_df['game_type'].isin(['WC', 'DIV', 'CON', 'SB']))
         ]
 
-        # Get all our rostered QBs
-        rostered_qbs = db.query(Quarterback).filter(Quarterback.season == season).all()
-        qb_map = {qb.name: qb for qb in rostered_qbs}
+        # Get rostered QB name mapping
+        qb_map = NFLStatsService._get_qb_name_map(db, season)
 
         wins_synced = 0
         wins_created = 0

@@ -18,7 +18,7 @@ app = FastAPI(
 )
 
 # Configure CORS for frontend
-# Allow Railway frontend URL from environment variable
+# Production origins from environment, localhost for development
 allowed_origins = [
     "http://localhost:5173",
     "http://localhost:5174",
@@ -34,8 +34,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # Include routers
