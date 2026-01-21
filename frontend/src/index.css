@@ -187,3 +187,42 @@ input::placeholder {
   background: linear-gradient(135deg, #FF6B81 0%, #FF4757 100%);
   box-shadow: 0 0 20px rgba(255, 71, 87, 0.4);
 }
+
+/* ESPN-style Ticker */
+.ticker-wrap {
+  overflow: hidden;
+  background: linear-gradient(90deg, #1A1A1A 0%, #242424 50%, #1A1A1A 100%);
+  border-bottom: 2px solid #F5A623;
+}
+
+.ticker {
+  display: flex;
+  animation: ticker-scroll 30s linear infinite;
+}
+
+.ticker:hover {
+  animation-play-state: paused;
+}
+
+.ticker-item {
+  flex-shrink: 0;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.ticker-divider {
+  color: #F5A623;
+  opacity: 0.5;
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

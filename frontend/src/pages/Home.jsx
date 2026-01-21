@@ -28,6 +28,47 @@ export default function Home() {
     }
   };
 
+  // Generate ticker items from data
+  const getTickerItems = () => {
+    const items = [];
+
+    if (standings.length > 0) {
+      // Leader
+      const leader = standings[0];
+      items.push({ label: '1ST PLACE', value: leader.squad_name, points: leader.total_points.toFixed(2), type: 'gold' });
+
+      // Top QB overall
+      const topQB = standings.flatMap(s => s.top_qbs).sort((a, b) => b.total_points - a.total_points)[0];
+      if (topQB) {
+        items.push({ label: 'TOP QB', value: topQB.name, points: topQB.total_points.toFixed(2), type: 'white' });
+      }
+
+      // All standings
+      standings.forEach((squad) => {
+        items.push({
+          label: squad.squad_name.replace('Team ', '').toUpperCase(),
+          value: `${squad.total_points.toFixed(2)} PTS`,
+          type: squad.rank === 1 ? 'gold' : squad.rank === standings.length ? 'danger' : 'white'
+        });
+      });
+
+      // Last place
+      const lastPlace = standings[standings.length - 1];
+      items.push({ label: 'LAST PLACE', value: lastPlace.squad_name, points: `-$210`, type: 'danger' });
+    }
+
+    // Worst QB
+    if (worstQB) {
+      items.push({ label: 'HALL OF SHAME', value: worstQB.name, points: worstQB.total_points.toFixed(2), type: 'danger' });
+    }
+
+    // League info
+    items.push({ label: '2025 DUES', value: '$70/team', type: 'white' });
+    items.push({ label: 'PRIZE POOL', value: '$420', type: 'gold' });
+
+    return items;
+  };
+
   const getRankDisplay = (rank) => {
     switch (rank) {
       case 1: return { icon: '👑', color: 'text-gold' };
@@ -64,8 +105,38 @@ export default function Home() {
     );
   }
 
+  const tickerItems = getTickerItems();
+
   return (
     <div className="space-y-8">
+      {/* ESPN-Style Ticker */}
+      {tickerItems.length > 0 && (
+        <div className="ticker-wrap rounded-lg overflow-hidden -mt-4 mb-4">
+          <div className="ticker py-3">
+            {/* Duplicate items for seamless loop */}
+            {[...tickerItems, ...tickerItems].map((item, idx) => (
+              <div key={idx} className="ticker-item">
+                <span className="font-oswald text-xs font-bold text-gold uppercase tracking-wider">
+                  {item.label}
+                </span>
+                <span className={`font-oswald font-semibold ${
+                  item.type === 'gold' ? 'text-gold' :
+                  item.type === 'danger' ? 'text-danger' : 'text-white'
+                }`}>
+                  {item.value}
+                </span>
+                {item.points && (
+                  <span className="font-mono text-sm text-text-muted">
+                    {item.points}
+                  </span>
+                )}
+                <span className="ticker-divider ml-4">◆</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="text-center">
         <h1 className="font-oswald text-4xl md:text-5xl font-bold text-white tracking-wide uppercase mb-2">
