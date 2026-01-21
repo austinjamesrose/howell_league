@@ -72,7 +72,7 @@ export default function Home() {
           League Standings
         </h1>
         <p className="text-text-secondary font-mono text-sm">
-          2025 Season • QB Only League • Top 5 QBs Count
+          2025 Season • Howell League • Top 5 QBs Count
         </p>
       </div>
 

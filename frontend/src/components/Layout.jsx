@@ -108,7 +108,7 @@ export default function Layout() {
       <footer className="border-t border-border-subtle py-6 mt-auto">
         <div className="container mx-auto px-4 text-center">
           <p className="text-text-muted text-sm font-mono">
-            QB Only League • Est. 2021
+            Howell League • Est. 2021
           </p>
         </div>
       </footer>

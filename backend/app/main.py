@@ -21,6 +21,7 @@ app = FastAPI(
 # Allow Railway frontend URL from environment variable
 allowed_origins = [
     "http://localhost:5173",
+    "http://localhost:5174",
     "http://localhost:3000",
     "https://dill-qb-league.up.railway.app",
     "https://qbleague.xyz"
