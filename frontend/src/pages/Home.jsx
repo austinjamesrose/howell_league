@@ -28,17 +28,37 @@ export default function Home() {
     }
   };
 
+  const getRankDisplay = (rank) => {
+    switch (rank) {
+      case 1: return { icon: '👑', color: 'text-gold' };
+      case 2: return { icon: '🥈', color: 'text-silver' };
+      case 3: return { icon: '🥉', color: 'text-bronze' };
+      case 6: return { icon: '💀', color: 'text-danger' };
+      default: return { icon: `#${rank}`, color: 'text-text-secondary' };
+    }
+  };
+
+  const getRowStyles = (rank, totalTeams) => {
+    if (rank === 1) {
+      return 'border-glow-gold bg-gold/5 animate-pulse-gold';
+    }
+    if (rank === totalTeams) {
+      return 'border-glow-danger bg-danger/5';
+    }
+    return 'border-l-3 border-transparent hover:bg-dark-elevated';
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-96">
-        <div className="text-xl text-gray-600">Loading...</div>
+        <div className="text-xl text-text-secondary font-mono">Loading...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+      <div className="bg-danger/20 border border-danger text-danger px-6 py-4 rounded-lg">
         {error}
       </div>
     );
@@ -46,100 +66,132 @@ export default function Home() {
 
   return (
     <div className="space-y-8">
+      {/* Page Header */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">
-          Howell League Standings
+        <h1 className="font-oswald text-4xl md:text-5xl font-bold text-white tracking-wide uppercase mb-2">
+          League Standings
         </h1>
-        <p className="text-gray-600">2025 Season - QB Only League</p>
+        <p className="text-text-secondary font-mono text-sm">
+          2025 Season • QB Only League • Top 5 QBs Count
+        </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="bg-blue-600 text-white px-6 py-4">
-          <h2 className="text-2xl font-bold">League Standings</h2>
-          <p className="text-sm opacity-90">Based on top 5 QBs per squad</p>
+      {/* Standings Table */}
+      <div className="bg-dark-surface rounded-lg border border-border-subtle overflow-hidden">
+        {/* Table Header */}
+        <div className="bg-dark-elevated px-6 py-4 border-b border-border-subtle">
+          <div className="flex items-center justify-between">
+            <h2 className="font-oswald text-lg font-semibold text-white uppercase tracking-wide">
+              Current Standings
+            </h2>
+            <span className="text-text-muted text-xs font-mono">
+              Based on top 5 QBs per squad
+            </span>
+          </div>
         </div>
 
+        {/* Table */}
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border-subtle">
+                <th className="px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Rank
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Squad
+                <th className="px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                  Team
                 </th>
-                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Owner
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Projected Payout
+                <th className="px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                  Payout
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total Points
+                <th className="px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                  Points
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {standings.map((squad) => (
-                <tr
-                  key={squad.squad_id}
-                  className={squad.rank === 1 ? 'bg-yellow-50' : 'hover:bg-gray-50'}
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-bold text-gray-900">
-                      {squad.rank === 1 && '👑 '}
-                      #{squad.rank}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {squad.squad_name}
-                    </div>
-                  </td>
-                  <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{squad.owner}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <div className={`text-sm font-semibold ${
-                      squad.projected_payout > 0
-                        ? 'text-green-600'
-                        : squad.projected_payout < 0
-                        ? 'text-red-600'
-                        : 'text-gray-600'
-                    }`}>
-                      {squad.projected_payout > 0 ? '+' : ''}${squad.projected_payout}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <div className="text-lg font-bold text-blue-600">
-                      {squad.total_points.toFixed(2)}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+            <tbody>
+              {standings.map((squad) => {
+                const rankDisplay = getRankDisplay(squad.rank);
+                const rowStyles = getRowStyles(squad.rank, standings.length);
+
+                return (
+                  <tr
+                    key={squad.squad_id}
+                    className={`table-row-hover border-b border-border-subtle last:border-b-0 ${rowStyles}`}
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`font-oswald text-lg font-bold ${rankDisplay.color}`}>
+                        {rankDisplay.icon}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`font-oswald font-semibold uppercase tracking-wide ${
+                        squad.rank === 1 ? 'text-gold' : squad.rank === standings.length ? 'text-danger' : 'text-white'
+                      }`}>
+                        {squad.squad_name}
+                      </span>
+                    </td>
+                    <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
+                      <span className="text-text-secondary">{squad.owner}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <span className={`font-mono font-semibold ${
+                        squad.projected_payout > 0
+                          ? 'text-success'
+                          : squad.projected_payout < 0
+                          ? 'text-danger'
+                          : 'text-text-secondary'
+                      }`}>
+                        {squad.projected_payout > 0 ? '+' : ''}${squad.projected_payout}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <span className={`font-mono text-xl font-bold ${
+                        squad.rank === 1 ? 'text-gold' : squad.rank === standings.length ? 'text-danger' : 'text-white'
+                      }`}>
+                        {squad.total_points.toFixed(2)}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
+      </div>
 
-        {standings.length > 0 && (
-          <div className="bg-gray-50 px-6 py-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
-              Top 5 QBs (Counting Toward Standings)
+      {/* Top 5 QBs Grid */}
+      {standings.length > 0 && (
+        <div className="bg-dark-surface rounded-lg border border-border-subtle overflow-hidden">
+          <div className="bg-dark-elevated px-6 py-4 border-b border-border-subtle">
+            <h3 className="font-oswald text-lg font-semibold text-white uppercase tracking-wide">
+              Top 5 QBs Per Team
             </h3>
+          </div>
+          <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {standings.map((squad) => (
-                <div key={squad.squad_id} className="bg-white p-3 rounded border">
-                  <div className="font-semibold text-sm text-gray-900 mb-2">
+                <div
+                  key={squad.squad_id}
+                  className="bg-dark-primary p-4 rounded-lg border border-border-subtle card-hover"
+                >
+                  <div className="font-oswald font-semibold text-white uppercase tracking-wide mb-3 flex items-center gap-2">
+                    {squad.rank === 1 && <span className="text-gold">👑</span>}
+                    {squad.rank === standings.length && <span className="text-danger">💀</span>}
                     {squad.squad_name}
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {squad.top_qbs.map((qb, idx) => (
-                      <div key={qb.qb_id} className="flex justify-between text-xs">
-                        <span className="text-gray-600">
-                          {idx + 1}. {qb.name} ({qb.nfl_team})
+                      <div key={qb.qb_id} className="flex justify-between text-sm">
+                        <span className="text-text-secondary">
+                          <span className="text-gold mr-2">★</span>
+                          {idx + 1}. {qb.name}
+                          <span className="text-text-muted ml-1">({qb.nfl_team})</span>
                         </span>
-                        <span className="font-semibold text-blue-600">
+                        <span className="font-mono font-semibold text-white">
                           {qb.total_points.toFixed(2)}
                         </span>
                       </div>
@@ -149,24 +201,42 @@ export default function Home() {
               ))}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
+      {/* Hall of Shame - Worst QB */}
       {worstQB && (
-        <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white p-6 rounded-lg shadow-lg">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-2">
-              Worst QB of the Season (So Far)
+        <div className="relative overflow-hidden rounded-lg border-2 border-danger animate-pulse-danger scanlines">
+          {/* Background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-danger/20 via-danger-dim/10 to-dark-primary" />
+
+          {/* Content */}
+          <div className="relative p-8 text-center">
+            <div className="mb-4">
+              <span className="inline-block px-4 py-1 bg-danger/30 rounded-full text-danger text-xs font-oswald uppercase tracking-widest">
+                Hall of Shame
+              </span>
+            </div>
+
+            <h2 className="font-oswald text-2xl md:text-3xl font-bold text-danger uppercase tracking-wide mb-2">
+              Worst QB of 2025
             </h2>
-            <p className="text-3xl font-extrabold mb-1">{worstQB.name}</p>
-            <p className="text-lg opacity-90">
+
+            <p className="font-oswald text-4xl md:text-5xl font-bold text-white uppercase tracking-wide mb-2">
+              {worstQB.name}
+            </p>
+
+            <p className="text-text-secondary mb-4">
               {worstQB.nfl_team} • {worstQB.squad_name}
             </p>
-            <p className="text-4xl font-bold mt-3">
-              {worstQB.total_points.toFixed(2)} pts
+
+            <p className="font-mono text-5xl md:text-6xl font-bold text-danger mb-4">
+              {worstQB.total_points.toFixed(2)}
+              <span className="text-2xl ml-2">pts</span>
             </p>
-            <p className="text-sm mt-2 opacity-75">
-              The league shall be named after this QB following the Super Bowl
+
+            <p className="text-text-muted text-sm italic max-w-md mx-auto">
+              "The league shall bear this name come February..."
             </p>
           </div>
         </div>

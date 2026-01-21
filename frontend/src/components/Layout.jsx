@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 
 export default function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const navLinks = [
     { to: '/', label: 'Standings' },
@@ -13,22 +14,43 @@ export default function Layout() {
     { to: '/admin', label: 'Admin' },
   ];
 
+  const isActive = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-blue-600 text-white shadow-lg">
+    <div className="min-h-screen bg-dark-primary">
+      {/* Header */}
+      <nav className="bg-dark-surface border-b border-border-subtle bg-noise sticky top-0 z-50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="text-xl font-bold">
-              Howell League
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2">
+              <span className="text-gold text-lg">▰▰▰</span>
+              <div>
+                <span className="font-oswald text-xl font-bold text-white tracking-wide">
+                  HOWELL LEAGUE
+                </span>
+                <span className="hidden sm:inline text-text-muted text-xs ml-3">
+                  2025 Season
+                </span>
+              </div>
             </Link>
 
             {/* Desktop navigation */}
-            <div className="hidden md:flex space-x-4">
+            <div className="hidden md:flex items-center space-x-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className="hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium"
+                  className={`
+                    tab-underline px-4 py-2 font-inter text-sm font-medium transition-colors
+                    ${isActive(link.to)
+                      ? 'text-gold active'
+                      : 'text-text-secondary hover:text-white'
+                    }
+                  `}
                 >
                   {link.label}
                 </Link>
@@ -37,7 +59,7 @@ export default function Layout() {
 
             {/* Hamburger button for mobile */}
             <button
-              className="md:hidden p-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-white"
+              className="md:hidden p-2 rounded-md text-text-secondary hover:text-white hover:bg-dark-elevated focus:outline-none focus:ring-2 focus:ring-gold"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -55,12 +77,18 @@ export default function Layout() {
 
           {/* Mobile menu dropdown */}
           {mobileMenuOpen && (
-            <div className="md:hidden pb-4">
+            <div className="md:hidden pb-4 border-t border-border-subtle mt-2 pt-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className="block hover:bg-blue-700 px-3 py-2 rounded-md text-base font-medium"
+                  className={`
+                    block px-4 py-3 rounded-md font-inter text-base font-medium transition-colors
+                    ${isActive(link.to)
+                      ? 'text-gold bg-dark-elevated'
+                      : 'text-text-secondary hover:text-white hover:bg-dark-elevated'
+                    }
+                  `}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
@@ -70,9 +98,20 @@ export default function Layout() {
           )}
         </div>
       </nav>
+
+      {/* Main content */}
       <main className="container mx-auto px-4 py-8">
         <Outlet />
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border-subtle py-6 mt-auto">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-text-muted text-sm font-mono">
+            QB Only League • Est. 2021
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

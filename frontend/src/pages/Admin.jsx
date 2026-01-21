@@ -52,7 +52,6 @@ export default function Admin() {
   });
 
   useEffect(() => {
-    // Check if already authenticated in session
     const authStatus = sessionStorage.getItem('adminAuthenticated');
     if (authStatus === 'true') {
       setIsAuthenticated(true);
@@ -73,9 +72,7 @@ export default function Admin() {
     try {
       const response = await fetch(`${API_BASE_URL}/api/admin/verify-password/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
       });
 
@@ -113,7 +110,6 @@ export default function Admin() {
     try {
       const result = await api.addWeeklyStat(weeklyForm);
       setMessage({ type: 'success', text: result.message });
-      // Reset form
       setWeeklyForm({
         ...weeklyForm,
         passing_yards: 0,
@@ -164,7 +160,7 @@ export default function Admin() {
     } catch (err) {
       setMessage({
         type: 'error',
-        text: 'Failed to sync stats. The 2025 season data may not be available yet. Try using 2024 data for testing.'
+        text: 'Failed to sync stats. The 2025 season data may not be available yet.'
       });
     } finally {
       setSyncing(false);
@@ -182,10 +178,7 @@ export default function Admin() {
         text: `${result.message} - Wins synced: ${result.total_wins_synced} (${result.games_checked} games checked)`
       });
     } catch (err) {
-      setMessage({
-        type: 'error',
-        text: 'Failed to sync wins. Make sure the season data is available.'
-      });
+      setMessage({ type: 'error', text: 'Failed to sync wins.' });
     } finally {
       setSyncing(false);
     }
@@ -199,13 +192,10 @@ export default function Admin() {
       const result = await api.syncPlayoffs(syncForm.season);
       setMessage({
         type: 'success',
-        text: `${result.message} - Wins synced: ${result.total_wins_synced} (${result.playoff_games_checked} playoff games checked)`
+        text: `${result.message} - Wins synced: ${result.total_wins_synced}`
       });
     } catch (err) {
-      setMessage({
-        type: 'error',
-        text: 'Failed to sync playoffs. Make sure the season data is available.'
-      });
+      setMessage({ type: 'error', text: 'Failed to sync playoffs.' });
     } finally {
       setSyncing(false);
     }
@@ -217,50 +207,52 @@ export default function Admin() {
       setSyncing(true);
       setMessage({ type: 'info', text: `Seeding POW/POM awards for ${syncForm.season}...` });
       const result = await api.seedAwards(syncForm.season);
-      const teamBreakdown = Object.entries(result.points_by_team)
-        .sort((a, b) => b[1] - a[1])
-        .map(([team, pts]) => `${team}: +${pts}`)
-        .join(', ');
       setMessage({
         type: 'success',
-        text: `${result.message} - POW: ${result.pow_awards} (${result.pow_points} pts), POM: ${result.pom_awards} (${result.pom_points} pts). By team: ${teamBreakdown}`
+        text: `${result.message} - POW: ${result.pow_awards}, POM: ${result.pom_awards}`
       });
     } catch (err) {
-      setMessage({
-        type: 'error',
-        text: 'Failed to seed awards. Make sure the database has QBs loaded.'
-      });
+      setMessage({ type: 'error', text: 'Failed to seed awards.' });
     } finally {
       setSyncing(false);
     }
   };
 
-  // Show login screen if not authenticated
+  const tabs = [
+    { id: 'sync', label: 'Sync Stats' },
+    { id: 'weekly', label: 'Manual Entry' },
+    { id: 'bonus', label: 'Bonuses' },
+    { id: 'playoff', label: 'Playoffs' },
+  ];
+
+  // Login screen
   if (!isAuthenticated) {
     return (
       <div className="max-w-md mx-auto mt-20">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-dark-surface rounded-lg border border-border-subtle p-8">
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Login</h1>
-            <p className="text-gray-600">Enter password to access admin panel</p>
+            <h1 className="font-oswald text-3xl font-bold text-white uppercase tracking-wide mb-2">
+              Admin Login
+            </h1>
+            <p className="text-text-secondary">Enter password to access admin panel</p>
           </div>
 
           {authError && (
-            <div className="mb-4 p-4 bg-red-100 text-red-700 rounded border border-red-400">
+            <div className="mb-4 p-4 bg-danger/20 text-danger rounded-lg border border-danger/30">
               {authError}
             </div>
           )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Password
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full"
                 placeholder="Enter admin password"
                 required
                 autoFocus
@@ -270,11 +262,7 @@ export default function Admin() {
             <button
               type="submit"
               disabled={isAuthenticating}
-              className={`w-full py-3 rounded-lg font-medium ${
-                isAuthenticating
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}
+              className={`btn w-full ${isAuthenticating ? 'bg-text-muted cursor-not-allowed' : 'btn-gold'}`}
             >
               {isAuthenticating ? 'Authenticating...' : 'Login'}
             </button>
@@ -286,89 +274,73 @@ export default function Admin() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* Page Header */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Admin Panel</h1>
-        <p className="text-gray-600">Manually enter stats, bonuses, and playoff data</p>
+        <h1 className="font-oswald text-4xl md:text-5xl font-bold text-white tracking-wide uppercase mb-2">
+          Admin Panel
+        </h1>
+        <p className="text-text-secondary font-mono text-sm">
+          Manage stats, bonuses, and playoff data
+        </p>
         <button
           onClick={handleLogout}
-          className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+          className="mt-2 text-sm text-danger hover:text-danger/80 transition-colors"
         >
           Logout
         </button>
       </div>
 
+      {/* Message */}
       {message && (
         <div
-          className={`p-4 rounded ${
+          className={`p-4 rounded-lg border ${
             message.type === 'success'
-              ? 'bg-green-100 text-green-700 border border-green-400'
-              : 'bg-red-100 text-red-700 border border-red-400'
+              ? 'bg-success/20 text-success border-success/30'
+              : message.type === 'info'
+              ? 'bg-gold/20 text-gold border-gold/30'
+              : 'bg-danger/20 text-danger border-danger/30'
           }`}
         >
           {message.text}
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="flex border-b">
-          <button
-            onClick={() => setActiveTab('sync')}
-            className={`flex-1 px-6 py-4 font-medium ${
-              activeTab === 'sync'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Sync Stats
-          </button>
-          <button
-            onClick={() => setActiveTab('weekly')}
-            className={`flex-1 px-6 py-4 font-medium ${
-              activeTab === 'weekly'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Manual Entry
-          </button>
-          <button
-            onClick={() => setActiveTab('bonus')}
-            className={`flex-1 px-6 py-4 font-medium ${
-              activeTab === 'bonus'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Bonuses
-          </button>
-          <button
-            onClick={() => setActiveTab('playoff')}
-            className={`flex-1 px-6 py-4 font-medium ${
-              activeTab === 'playoff'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Playoffs
-          </button>
+      {/* Admin Card */}
+      <div className="bg-dark-surface rounded-lg border border-border-subtle overflow-hidden">
+        {/* Tabs */}
+        <div className="flex border-b border-border-subtle">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`
+                flex-1 px-6 py-4 font-oswald font-medium uppercase tracking-wide text-sm transition-colors
+                ${activeTab === tab.id
+                  ? 'bg-gold text-dark-primary'
+                  : 'bg-dark-elevated text-text-secondary hover:text-white hover:bg-dark-primary'
+                }
+              `}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         <div className="p-6">
+          {/* Sync Tab */}
           {activeTab === 'sync' && (
             <form onSubmit={handleSyncStats} className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <h3 className="font-semibold text-blue-900 mb-2">🏈 Auto-Sync Season Stats</h3>
-                <p className="text-sm text-blue-700">
+              <div className="bg-gold/10 border border-gold/20 rounded-lg p-4 mb-4">
+                <h3 className="font-oswald font-semibold text-gold uppercase tracking-wide mb-2">
+                  Auto-Sync Season Stats
+                </h3>
+                <p className="text-sm text-text-secondary">
                   Automatically pull season aggregate QB stats from NFL data.
-                  Stats include total passing/rushing yards, TDs, INTs, and fumbles for the entire season.
-                </p>
-                <p className="text-sm text-blue-600 mt-2">
-                  ⚠️ Note: 2025 season data may have a delay. If sync fails, try 2024 data for testing.
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-2">
                   Season
                 </label>
                 <input
@@ -376,93 +348,80 @@ export default function Admin() {
                   min="2020"
                   max="2025"
                   value={syncForm.season}
-                  onChange={(e) =>
-                    setSyncForm({ ...syncForm, season: parseInt(e.target.value) })
-                  }
-                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  onChange={(e) => setSyncForm({ ...syncForm, season: parseInt(e.target.value) })}
+                  className="w-full"
                   required
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={syncing}
-                className={`w-full py-3 rounded-lg font-medium ${
-                  syncing
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
-                }`}
-              >
-                {syncing ? 'Syncing...' : '🔄 Sync Stats from NFL'}
-              </button>
+              <div className="space-y-3">
+                <button
+                  type="submit"
+                  disabled={syncing}
+                  className={`btn w-full ${syncing ? 'bg-text-muted cursor-not-allowed' : 'btn-gold'}`}
+                >
+                  {syncing ? 'Syncing...' : 'Sync Stats from NFL'}
+                </button>
 
-              <button
-                type="button"
-                onClick={handleSyncWins}
-                disabled={syncing}
-                className={`w-full py-3 rounded-lg font-medium ${
-                  syncing
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-green-600 hover:bg-green-700 text-white'
-                }`}
-              >
-                {syncing ? 'Syncing...' : '🏆 Sync QB Wins from Game Results'}
-              </button>
+                <button
+                  type="button"
+                  onClick={handleSyncWins}
+                  disabled={syncing}
+                  className={`w-full py-3 rounded-lg font-oswald font-medium uppercase tracking-wide transition-all ${
+                    syncing ? 'bg-text-muted cursor-not-allowed text-dark-primary' : 'bg-success hover:bg-success-dim text-white'
+                  }`}
+                >
+                  {syncing ? 'Syncing...' : 'Sync QB Wins'}
+                </button>
 
-              <button
-                type="button"
-                onClick={handleSyncPlayoffs}
-                disabled={syncing}
-                className={`w-full py-3 rounded-lg font-medium ${
-                  syncing
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-purple-600 hover:bg-purple-700 text-white'
-                }`}
-              >
-                {syncing ? 'Syncing...' : '🏈 Sync Playoff Wins'}
-              </button>
+                <button
+                  type="button"
+                  onClick={handleSyncPlayoffs}
+                  disabled={syncing}
+                  className={`w-full py-3 rounded-lg font-oswald font-medium uppercase tracking-wide transition-all ${
+                    syncing ? 'bg-text-muted cursor-not-allowed text-dark-primary' : 'bg-purple-600 hover:bg-purple-700 text-white'
+                  }`}
+                >
+                  {syncing ? 'Syncing...' : 'Sync Playoff Wins'}
+                </button>
 
-              <button
-                type="button"
-                onClick={handleSeedAwards}
-                disabled={syncing}
-                className={`w-full py-3 rounded-lg font-medium ${
-                  syncing
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-yellow-600 hover:bg-yellow-700 text-white'
-                }`}
-              >
-                {syncing ? 'Seeding...' : '🏅 Seed POW/POM Awards'}
-              </button>
+                <button
+                  type="button"
+                  onClick={handleSeedAwards}
+                  disabled={syncing}
+                  className={`w-full py-3 rounded-lg font-oswald font-medium uppercase tracking-wide transition-all ${
+                    syncing ? 'bg-text-muted cursor-not-allowed text-dark-primary' : 'bg-gold-dim hover:bg-gold text-dark-primary'
+                  }`}
+                >
+                  {syncing ? 'Seeding...' : 'Seed POW/POM Awards'}
+                </button>
+              </div>
 
-              <div className="mt-4 p-4 bg-gray-50 rounded border border-gray-200">
-                <h4 className="font-semibold text-gray-900 mb-2">How it works:</h4>
-                <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
-                  <li><strong>Sync Stats:</strong> Fetches season aggregate stats (yards, TDs, INTs, fumbles)</li>
-                  <li><strong>Sync Wins:</strong> Credits wins to starting QBs (3 pts regular, 4 pts prime time)</li>
-                  <li><strong>Sync Playoffs:</strong> Credits playoff WINS (WC: 3, DIV: 6, CON: 10, SB: 15+25)</li>
-                  <li><strong>Seed Awards:</strong> Adds Player of Week (10 pts) and Player of Month (20 pts) bonuses</li>
-                  <li>All syncs update automatically as games complete</li>
-                  <li>Only starting QBs receive credit</li>
-                  <li>Safe to run multiple times (won't create duplicates)</li>
-                  <li>MVP, ROY bonuses still require manual entry</li>
+              <div className="mt-4 p-4 bg-dark-primary rounded-lg border border-border-subtle">
+                <h4 className="font-oswald font-semibold text-white uppercase tracking-wide mb-2">
+                  How it works:
+                </h4>
+                <ul className="text-sm text-text-secondary space-y-1">
+                  <li>• <strong className="text-white">Sync Stats:</strong> Fetches yards, TDs, INTs, fumbles</li>
+                  <li>• <strong className="text-white">Sync Wins:</strong> Credits wins to starting QBs</li>
+                  <li>• <strong className="text-white">Sync Playoffs:</strong> Credits playoff wins</li>
+                  <li>• <strong className="text-white">Seed Awards:</strong> Adds POW/POM bonuses</li>
                 </ul>
               </div>
             </form>
           )}
 
+          {/* Manual Entry Tab */}
           {activeTab === 'weekly' && (
             <form onSubmit={handleWeeklySubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-2">
                   Quarterback
                 </label>
                 <select
                   value={weeklyForm.qb_id}
-                  onChange={(e) =>
-                    setWeeklyForm({ ...weeklyForm, qb_id: parseInt(e.target.value) })
-                  }
-                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  onChange={(e) => setWeeklyForm({ ...weeklyForm, qb_id: parseInt(e.target.value) })}
+                  className="w-full"
                   required
                 >
                   <option value="">Select QB</option>
@@ -476,184 +435,88 @@ export default function Admin() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Week
-                  </label>
+                  <label className="block text-sm font-medium text-text-secondary mb-2">Week</label>
                   <input
                     type="number"
                     min="1"
                     max="18"
                     value={weeklyForm.week}
-                    onChange={(e) =>
-                      setWeeklyForm({ ...weeklyForm, week: parseInt(e.target.value) })
-                    }
-                    className="w-full border border-gray-300 rounded px-3 py-2"
+                    onChange={(e) => setWeeklyForm({ ...weeklyForm, week: parseInt(e.target.value) })}
+                    className="w-full"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Season
-                  </label>
+                  <label className="block text-sm font-medium text-text-secondary mb-2">Season</label>
                   <input
                     type="number"
                     value={weeklyForm.season}
-                    onChange={(e) =>
-                      setWeeklyForm({ ...weeklyForm, season: parseInt(e.target.value) })
-                    }
-                    className="w-full border border-gray-300 rounded px-3 py-2"
+                    onChange={(e) => setWeeklyForm({ ...weeklyForm, season: parseInt(e.target.value) })}
+                    className="w-full"
                     required
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Pass Yards
-                  </label>
-                  <input
-                    type="number"
-                    value={weeklyForm.passing_yards}
-                    onChange={(e) =>
-                      setWeeklyForm({
-                        ...weeklyForm,
-                        passing_yards: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Rush Yards
-                  </label>
-                  <input
-                    type="number"
-                    value={weeklyForm.rushing_yards}
-                    onChange={(e) =>
-                      setWeeklyForm({
-                        ...weeklyForm,
-                        rushing_yards: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Pass TDs
-                  </label>
-                  <input
-                    type="number"
-                    value={weeklyForm.passing_tds}
-                    onChange={(e) =>
-                      setWeeklyForm({
-                        ...weeklyForm,
-                        passing_tds: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Rush TDs
-                  </label>
-                  <input
-                    type="number"
-                    value={weeklyForm.rushing_tds}
-                    onChange={(e) =>
-                      setWeeklyForm({
-                        ...weeklyForm,
-                        rushing_tds: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    INTs
-                  </label>
-                  <input
-                    type="number"
-                    value={weeklyForm.interceptions}
-                    onChange={(e) =>
-                      setWeeklyForm({
-                        ...weeklyForm,
-                        interceptions: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fumbles
-                  </label>
-                  <input
-                    type="number"
-                    value={weeklyForm.fumbles}
-                    onChange={(e) =>
-                      setWeeklyForm({
-                        ...weeklyForm,
-                        fumbles: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded px-3 py-2"
-                  />
-                </div>
+                {[
+                  { label: 'Pass Yards', key: 'passing_yards' },
+                  { label: 'Rush Yards', key: 'rushing_yards' },
+                  { label: 'Pass TDs', key: 'passing_tds' },
+                  { label: 'Rush TDs', key: 'rushing_tds' },
+                  { label: 'INTs', key: 'interceptions' },
+                  { label: 'Fumbles', key: 'fumbles' },
+                ].map((field) => (
+                  <div key={field.key}>
+                    <label className="block text-sm font-medium text-text-secondary mb-2">{field.label}</label>
+                    <input
+                      type="number"
+                      value={weeklyForm[field.key]}
+                      onChange={(e) => setWeeklyForm({ ...weeklyForm, [field.key]: parseInt(e.target.value) || 0 })}
+                      className="w-full"
+                    />
+                  </div>
+                ))}
               </div>
 
               <div className="flex items-center space-x-6">
-                <label className="flex items-center">
+                <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={weeklyForm.game_won}
-                    onChange={(e) =>
-                      setWeeklyForm({ ...weeklyForm, game_won: e.target.checked })
-                    }
-                    className="mr-2"
+                    onChange={(e) => setWeeklyForm({ ...weeklyForm, game_won: e.target.checked })}
+                    className="mr-2 w-4 h-4 accent-gold"
                   />
-                  <span className="text-sm font-medium text-gray-700">Game Won</span>
+                  <span className="text-sm text-text-secondary">Game Won</span>
                 </label>
-                <label className="flex items-center">
+                <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={weeklyForm.prime_time_win}
-                    onChange={(e) =>
-                      setWeeklyForm({ ...weeklyForm, prime_time_win: e.target.checked })
-                    }
-                    className="mr-2"
+                    onChange={(e) => setWeeklyForm({ ...weeklyForm, prime_time_win: e.target.checked })}
+                    className="mr-2 w-4 h-4 accent-gold"
                   />
-                  <span className="text-sm font-medium text-gray-700">
-                    Prime Time Win
-                  </span>
+                  <span className="text-sm text-text-secondary">Prime Time Win</span>
                 </label>
               </div>
 
-              <button
-                type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700"
-              >
+              <button type="submit" className="btn btn-gold w-full">
                 Add Weekly Stats
               </button>
             </form>
           )}
 
+          {/* Bonus Tab */}
           {activeTab === 'bonus' && (
             <form onSubmit={handleBonusSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-2">
                   Quarterback
                 </label>
                 <select
                   value={bonusForm.qb_id}
-                  onChange={(e) =>
-                    setBonusForm({ ...bonusForm, qb_id: parseInt(e.target.value) })
-                  }
-                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  onChange={(e) => setBonusForm({ ...bonusForm, qb_id: parseInt(e.target.value) })}
+                  className="w-full"
                   required
                 >
                   <option value="">Select QB</option>
@@ -666,15 +529,13 @@ export default function Admin() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-2">
                   Bonus Type
                 </label>
                 <select
                   value={bonusForm.bonus_type}
-                  onChange={(e) =>
-                    setBonusForm({ ...bonusForm, bonus_type: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  onChange={(e) => setBonusForm({ ...bonusForm, bonus_type: e.target.value })}
+                  className="w-full"
                   required
                 >
                   <option value="MVP">MVP (50 pts)</option>
@@ -688,27 +549,23 @@ export default function Admin() {
                 </select>
               </div>
 
-              <button
-                type="submit"
-                className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700"
-              >
+              <button type="submit" className="btn w-full bg-success hover:bg-success-dim text-white font-oswald font-medium uppercase tracking-wide py-3 rounded-lg">
                 Add Bonus
               </button>
             </form>
           )}
 
+          {/* Playoff Tab */}
           {activeTab === 'playoff' && (
             <form onSubmit={handlePlayoffSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-2">
                   Quarterback
                 </label>
                 <select
                   value={playoffForm.qb_id}
-                  onChange={(e) =>
-                    setPlayoffForm({ ...playoffForm, qb_id: parseInt(e.target.value) })
-                  }
-                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  onChange={(e) => setPlayoffForm({ ...playoffForm, qb_id: parseInt(e.target.value) })}
+                  className="w-full"
                   required
                 >
                   <option value="">Select QB</option>
@@ -721,15 +578,13 @@ export default function Admin() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-2">
                   Playoff Round
                 </label>
                 <select
                   value={playoffForm.round}
-                  onChange={(e) =>
-                    setPlayoffForm({ ...playoffForm, round: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  onChange={(e) => setPlayoffForm({ ...playoffForm, round: e.target.value })}
+                  className="w-full"
                   required
                 >
                   <option value="WILD_CARD">Wild Card (3 pts)</option>
@@ -739,24 +594,17 @@ export default function Admin() {
                 </select>
               </div>
 
-              <label className="flex items-center">
+              <label className="flex items-center cursor-pointer">
                 <input
                   type="checkbox"
                   checked={playoffForm.won_super_bowl}
-                  onChange={(e) =>
-                    setPlayoffForm({ ...playoffForm, won_super_bowl: e.target.checked })
-                  }
-                  className="mr-2"
+                  onChange={(e) => setPlayoffForm({ ...playoffForm, won_super_bowl: e.target.checked })}
+                  className="mr-2 w-4 h-4 accent-gold"
                 />
-                <span className="text-sm font-medium text-gray-700">
-                  Won Super Bowl (+25 pts)
-                </span>
+                <span className="text-sm text-text-secondary">Won Super Bowl (+25 pts)</span>
               </label>
 
-              <button
-                type="submit"
-                className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700"
-              >
+              <button type="submit" className="btn w-full bg-purple-600 hover:bg-purple-700 text-white font-oswald font-medium uppercase tracking-wide py-3 rounded-lg">
                 Add Playoff Appearance
               </button>
             </form>

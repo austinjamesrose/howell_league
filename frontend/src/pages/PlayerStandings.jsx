@@ -28,17 +28,26 @@ export default function PlayerStandings() {
     }
   };
 
+  const getRankDisplay = (index) => {
+    switch (index) {
+      case 0: return { icon: '🥇', color: 'text-gold' };
+      case 1: return { icon: '🥈', color: 'text-silver' };
+      case 2: return { icon: '🥉', color: 'text-bronze' };
+      default: return { icon: `#${index + 1}`, color: 'text-text-secondary' };
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-96">
-        <div className="text-xl text-gray-600">Loading...</div>
+        <div className="text-xl text-text-secondary font-mono">Loading...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+      <div className="bg-danger/20 border border-danger text-danger px-6 py-4 rounded-lg">
         {error}
       </div>
     );
@@ -46,87 +55,101 @@ export default function PlayerStandings() {
 
   return (
     <div className="space-y-6">
+      {/* Page Header */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">
+        <h1 className="font-oswald text-4xl md:text-5xl font-bold text-white tracking-wide uppercase mb-2">
           Player Standings
         </h1>
-        <p className="text-gray-600">All quarterbacks with points ranked by total (rostered & free agents)</p>
+        <p className="text-text-secondary font-mono text-sm">
+          All quarterbacks ranked by total points
+        </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      {/* Leaderboard Table */}
+      <div className="bg-dark-surface rounded-lg border border-border-subtle overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border-subtle bg-dark-elevated">
+                <th className="px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Rank
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Player
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  NFL Team
+                <th className="px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                  NFL
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Fantasy Team
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total Points
+                <th className="px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                  Points
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody>
               {players.map((player, index) => {
                 const isFreeAgent = player.squad_name === 'Free Agent';
-                const rowBgClass = isFreeAgent
-                  ? 'bg-blue-50 hover:bg-blue-100'
-                  : index < 3
-                    ? 'bg-yellow-50'
-                    : 'hover:bg-gray-50';
+                const rankDisplay = getRankDisplay(index);
+                const isTopThree = index < 3;
 
                 return (
-                <tr
-                  key={player.id}
-                  className={rowBgClass}
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-bold text-gray-900">
-                      {index === 0 && '🥇 '}
-                      {index === 1 && '🥈 '}
-                      {index === 2 && '🥉 '}
-                      #{index + 1}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <Link
-                      to={`/qb/${player.id}`}
-                      className="text-sm font-medium text-blue-600 hover:underline"
-                    >
-                      {player.name}
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{player.nfl_team}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-700">
-                      {player.squad_name === 'Free Agent' ? 'FA' : player.squad_name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <div className="text-lg font-bold text-blue-600">
-                      {player.total_points.toFixed(2)}
-                    </div>
-                  </td>
-                </tr>
-              );
+                  <tr
+                    key={player.id}
+                    className={`
+                      table-row-hover border-b border-border-subtle last:border-b-0
+                      ${isTopThree ? 'bg-gold/5' : ''}
+                      ${isFreeAgent ? 'opacity-60' : ''}
+                    `}
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`font-oswald text-lg font-bold ${rankDisplay.color}`}>
+                        {rankDisplay.icon}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Link
+                        to={`/qb/${player.id}`}
+                        className={`
+                          font-oswald font-semibold uppercase tracking-wide
+                          hover:text-gold transition-colors
+                          ${isTopThree ? 'text-gold' : 'text-white'}
+                        `}
+                      >
+                        {player.name}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-text-secondary font-mono text-sm">
+                        {player.nfl_team}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`text-sm ${isFreeAgent ? 'text-text-muted italic' : 'text-text-secondary'}`}>
+                        {isFreeAgent ? 'Free Agent' : player.squad_name}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <span className={`
+                        font-mono text-xl font-bold
+                        ${isTopThree ? 'text-gold' : 'text-white'}
+                      `}>
+                        {player.total_points.toFixed(2)}
+                      </span>
+                    </td>
+                  </tr>
+                );
               })}
             </tbody>
           </table>
         </div>
 
-        <div className="bg-gray-50 px-6 py-4 text-sm text-gray-600">
-          Showing {players.length} quarterbacks with points ({players.filter(p => p.squad_name === 'Free Agent').length} free agents)
+        {/* Footer */}
+        <div className="bg-dark-elevated px-6 py-3 border-t border-border-subtle">
+          <p className="text-text-muted text-sm font-mono">
+            {players.length} quarterbacks • {players.filter(p => p.squad_name === 'Free Agent').length} free agents
+          </p>
         </div>
       </div>
     </div>
