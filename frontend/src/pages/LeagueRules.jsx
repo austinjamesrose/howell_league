@@ -47,7 +47,8 @@ export default function LeagueRules() {
                   <li>2022/23: $55/Squad</li>
                   <li>2023/24: $60/Squad</li>
                   <li>2024/25: $65/Squad</li>
-                  <li className="text-gold font-semibold">2025/26: $70/Squad</li>
+                  <li>2025/26: $70/Squad</li>
+                  <li className="text-gold font-semibold">2026/27: $75/Squad</li>
                 </ul>
               </li>
               <li>5. Failure to pay League Dues prior to the NFL Draft will result in a vote for indefinite removal from the League (<span className="text-danger">"Banishment"</span>). A non-paying Owner will be Banished if at least 75% of the paying Owners vote to Banish.</li>

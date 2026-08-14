@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
+import { useSeason } from '../context/SeasonContext';
 
 export default function Home() {
+  const { season, dues, prizePool, lastPlacePenalty } = useSeason();
   const [standings, setStandings] = useState([]);
   const [worstQB, setWorstQB] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -9,14 +11,14 @@ export default function Home() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [season]);
 
   const loadData = async () => {
     try {
       setLoading(true);
       const [standingsData, worstQBData] = await Promise.all([
-        api.getStandings(),
-        api.getWorstQB(),
+        api.getStandings(season),
+        api.getWorstQB(season),
       ]);
       setStandings(standingsData.standings);
       setWorstQB(worstQBData.worst_qb);
@@ -54,7 +56,7 @@ export default function Home() {
 
       // Last place
       const lastPlace = standings[standings.length - 1];
-      items.push({ label: 'LAST PLACE', value: lastPlace.squad_name, points: `-$210`, type: 'danger' });
+      items.push({ label: 'LAST PLACE', value: lastPlace.squad_name, points: `-$${lastPlacePenalty}`, type: 'danger' });
     }
 
     // Worst QB
@@ -63,8 +65,8 @@ export default function Home() {
     }
 
     // League info
-    items.push({ label: '2025 DUES', value: '$70/team', type: 'white' });
-    items.push({ label: 'PRIZE POOL', value: '$420', type: 'gold' });
+    items.push({ label: `${season} DUES`, value: `$${dues}/team`, type: 'white' });
+    items.push({ label: 'PRIZE POOL', value: `$${prizePool}`, type: 'gold' });
 
     return items;
   };
@@ -143,7 +145,7 @@ export default function Home() {
           League Standings
         </h1>
         <p className="text-text-secondary font-mono text-sm">
-          2025 Season • Howell League • Top 5 QBs Count
+          {season} Season • Howell League • Top 5 QBs Count
         </p>
       </div>
 
@@ -290,7 +292,7 @@ export default function Home() {
             </div>
 
             <h2 className="font-oswald text-2xl md:text-3xl font-bold text-danger uppercase tracking-wide mb-2">
-              Worst QB of 2025
+              Worst QB of {season}
             </h2>
 
             <p className="font-oswald text-4xl md:text-5xl font-bold text-white uppercase tracking-wide mb-2">

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { useSeason } from '../context/SeasonContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export default function Admin() {
+  const { season } = useSeason();
   // Authentication state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
@@ -19,7 +21,7 @@ export default function Admin() {
   const [weeklyForm, setWeeklyForm] = useState({
     qb_id: '',
     week: 1,
-    season: 2025,
+    season: 2026,
     passing_yards: 0,
     rushing_yards: 0,
     passing_tds: 0,
@@ -34,21 +36,21 @@ export default function Admin() {
   // Bonus Form State
   const [bonusForm, setBonusForm] = useState({
     qb_id: '',
-    season: 2025,
+    season: 2026,
     bonus_type: 'MVP',
   });
 
   // Playoff Form State
   const [playoffForm, setPlayoffForm] = useState({
     qb_id: '',
-    season: 2025,
+    season: 2026,
     round: 'WILD_CARD',
     won_super_bowl: false,
   });
 
   // Sync Form State
   const [syncForm, setSyncForm] = useState({
-    season: 2025,
+    season: 2026,
   });
 
   useEffect(() => {
@@ -62,7 +64,15 @@ export default function Admin() {
     if (isAuthenticated) {
       loadQBs();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, season]);
+
+  // Keep the admin form seasons in sync with the season switcher.
+  useEffect(() => {
+    setWeeklyForm((f) => ({ ...f, season }));
+    setBonusForm((f) => ({ ...f, season }));
+    setPlayoffForm((f) => ({ ...f, season }));
+    setSyncForm((f) => ({ ...f, season }));
+  }, [season]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -98,7 +108,7 @@ export default function Admin() {
 
   const loadQBs = async () => {
     try {
-      const data = await api.getQuarterbacks();
+      const data = await api.getQuarterbacks(season);
       setQBs(data.quarterbacks);
     } catch (err) {
       console.error('Failed to load QBs:', err);
@@ -160,7 +170,7 @@ export default function Admin() {
     } catch (err) {
       setMessage({
         type: 'error',
-        text: 'Failed to sync stats. The 2025 season data may not be available yet.'
+        text: `Failed to sync stats. The ${syncForm.season} season data may not be available yet.`
       });
     } finally {
       setSyncing(false);
@@ -346,7 +356,7 @@ export default function Admin() {
                 <input
                   type="number"
                   min="2020"
-                  max="2025"
+                  max="2026"
                   value={syncForm.season}
                   onChange={(e) => setSyncForm({ ...syncForm, season: parseInt(e.target.value) })}
                   className="w-full"

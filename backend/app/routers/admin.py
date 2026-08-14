@@ -197,7 +197,7 @@ def add_playoff_appearance(playoff_data: PlayoffAppearanceCreate, db: Session = 
     }
 
 @router.post("/sync-stats/")
-def sync_nfl_stats(season: int = 2025, db: Session = Depends(get_db)):
+def sync_nfl_stats(season: int = 2026, db: Session = Depends(get_db)):
     """
     Sync NFL season aggregate stats from nflreadpy.
     This will fetch season totals for all rostered QBs and update the database.
@@ -212,7 +212,7 @@ def sync_nfl_stats(season: int = 2025, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Failed to sync stats: {str(e)}")
 
 @router.post("/sync-wins/")
-def sync_qb_wins(season: int = 2025, db: Session = Depends(get_db)):
+def sync_qb_wins(season: int = 2026, db: Session = Depends(get_db)):
     """
     Sync QB wins from NFL game results.
     Only credits wins to the starting QB for each game.
@@ -231,7 +231,7 @@ def sync_qb_wins(season: int = 2025, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Failed to sync wins: {str(e)}")
 
 @router.post("/sync-playoffs/")
-def sync_playoff_wins(season: int = 2025, db: Session = Depends(get_db)):
+def sync_playoff_wins(season: int = 2026, db: Session = Depends(get_db)):
     """
     Sync playoff WINS from NFL game results.
     Creates PlayoffAppearance entries for QBs who WON in each round.
@@ -252,17 +252,22 @@ def sync_playoff_wins(season: int = 2025, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Failed to sync playoffs: {str(e)}")
 
 @router.post("/seed-awards/")
-def seed_awards(season: int = 2025, db: Session = Depends(get_db)):
+def seed_awards(season: int = 2026, db: Session = Depends(get_db)):
     """
     Seed Player of the Week and Player of the Month awards for the season.
     Data sourced from Pro-Football-Reference.com.
 
     Only affects CONF_POW and CONF_POM bonuses - does NOT touch other stats.
     Safe to run multiple times (clears and re-adds POW/POM awards).
+
+    NOTE: The award lists below are 2025-season data. They are only applied
+    when seeding the 2025 season, so running this for another season simply
+    clears that season's POW/POM bonuses without adding the (wrong) 2025 data.
+    Add a new season's award list here when that data becomes available.
     """
-    # Players of the Week - 10 points each (CONF_POW)
-    # Only includes QBs that are on league rosters
-    players_of_week = [
+    # Award data by season. Add new seasons here as data becomes available.
+    # 2025 Players of the Week - 10 points each (CONF_POW)
+    players_of_week_2025 = [
         # AFC
         {"name": "Josh Allen", "week": 1},
         {"name": "Josh Allen", "week": 11},
@@ -285,12 +290,19 @@ def seed_awards(season: int = 2025, db: Session = Depends(get_db)):
         {"name": "Matthew Stafford", "week": 18},
     ]
 
-    # Players of the Month - 20 points each (CONF_POM)
-    players_of_month = [
+    # 2025 Players of the Month - 20 points each (CONF_POM)
+    players_of_month_2025 = [
         {"name": "Trevor Lawrence", "month": "December"},
         {"name": "Matthew Stafford", "month": "November"},
         {"name": "Matthew Stafford", "month": "December"},
     ]
+
+    # Select the award data for the requested season. Only 2025 data exists;
+    # other seasons get empty lists so we never apply 2025 awards elsewhere.
+    awards_by_season = {
+        2025: (players_of_week_2025, players_of_month_2025),
+    }
+    players_of_week, players_of_month = awards_by_season.get(season, ([], []))
 
     # Clear existing POW/POM bonuses for the season
     db.query(SeasonBonus).filter(
@@ -381,10 +393,13 @@ def debug_nfl_columns(season: int = 2024):
         return {"error": str(e)}
 
 @router.post("/seed-database/")
-def seed_database(season: int = 2025, db: Session = Depends(get_db)):
+def seed_database(season: int = 2026, db: Session = Depends(get_db)):
     """
-    ONE-TIME SETUP: Seeds the database with teams and QBs.
-    WARNING: This clears existing data!
+    ONE-TIME SETUP per season: Seeds the database with teams and QBs.
+
+    Season-scoped: refuses to run if the target season is already seeded, so
+    prior seasons are always preserved. To re-seed a season, delete its squads
+    first.
     """
     from app.models.models import Squad
 
@@ -396,45 +411,46 @@ def seed_database(season: int = 2025, db: Session = Depends(get_db)):
             detail=f"Database already has {existing_squads} squads for {season}. Delete them first if you want to re-seed."
         )
 
-    # Roster data
+    # Roster data (2026 season). nfl_team is display-only; NFL sync matches by
+    # name. "TBD" marks 2026 rookies whose NFL team still needs confirmation.
     rosters = {
         "Team AP": {
             "owner": "Austin Poncelet",
             "qbs": [
                 {"name": "Justin Herbert", "nfl_team": "LAC"},
-                {"name": "Russell Wilson", "nfl_team": "NYG"},
                 {"name": "Baker Mayfield", "nfl_team": "TB"},
                 {"name": "Tua Tagovailoa", "nfl_team": "MIA"},
                 {"name": "C.J. Stroud", "nfl_team": "HOU"},
                 {"name": "Joe Flacco", "nfl_team": "CIN"},
                 {"name": "Bo Nix", "nfl_team": "DEN"},
-                {"name": "Jameis Winston", "nfl_team": "NYG"},
+                {"name": "Malik Willis", "nfl_team": "GB"},
+                {"name": "Mason Rudolph", "nfl_team": "PIT"},
             ]
         },
         "Team Jar-Jar": {
             "owner": "Brad Foster",
             "qbs": [
                 {"name": "Patrick Mahomes", "nfl_team": "KC"},
-                {"name": "Kirk Cousins", "nfl_team": "ATL"},
                 {"name": "Jalen Hurts", "nfl_team": "PHI"},
-                {"name": "Kyle McCord", "nfl_team": "PHI"},
                 {"name": "Trevor Lawrence", "nfl_team": "JAX"},
                 {"name": "Brock Purdy", "nfl_team": "SF"},
                 {"name": "Michael Penix Jr.", "nfl_team": "ATL"},
                 {"name": "Jaxson Dart", "nfl_team": "NYG"},
+                {"name": "Mac Jones", "nfl_team": "SF"},
+                {"name": "Justin Fields", "nfl_team": "NYJ"},
             ]
         },
         "Team Mojo": {
             "owner": "Marc Orlando",
             "qbs": [
                 {"name": "Josh Allen", "nfl_team": "BUF"},
-                {"name": "Justin Fields", "nfl_team": "NYJ"},
-                {"name": "Geno Smith", "nfl_team": "SEA"},
+                {"name": "Geno Smith", "nfl_team": "LV"},
                 {"name": "Cam Ward", "nfl_team": "TEN"},
                 {"name": "Drake Maye", "nfl_team": "NE"},
                 {"name": "Shedeur Sanders", "nfl_team": "CLE"},
                 {"name": "Deshaun Watson", "nfl_team": "CLE"},
-                {"name": "Mason Rudolph", "nfl_team": "PIT"},
+                {"name": "Carson Beck", "nfl_team": "TBD"},
+                {"name": "Jacoby Brissett", "nfl_team": "ARI"},
             ]
         },
         "Team BMOC": {
@@ -442,11 +458,11 @@ def seed_database(season: int = 2025, db: Session = Depends(get_db)):
             "qbs": [
                 {"name": "Bryce Young", "nfl_team": "CAR"},
                 {"name": "Matthew Stafford", "nfl_team": "LAR"},
-                {"name": "Aaron Rodgers", "nfl_team": "NYJ"},
-                {"name": "Quinn Ewers", "nfl_team": "MIA"},
+                {"name": "Aaron Rodgers", "nfl_team": "PIT"},
                 {"name": "Sam Darnold", "nfl_team": "SEA"},
                 {"name": "Tyler Shough", "nfl_team": "NO"},
                 {"name": "Caleb Williams", "nfl_team": "CHI"},
+                {"name": "Drew Allar", "nfl_team": "TBD"},
                 {"name": "Spencer Rattler", "nfl_team": "NO"},
             ]
         },
@@ -455,12 +471,12 @@ def seed_database(season: int = 2025, db: Session = Depends(get_db)):
             "qbs": [
                 {"name": "Joe Burrow", "nfl_team": "CIN"},
                 {"name": "Lamar Jackson", "nfl_team": "BAL"},
-                {"name": "Will Levis", "nfl_team": "TEN"},
                 {"name": "Jared Goff", "nfl_team": "DET"},
                 {"name": "Daniel Jones", "nfl_team": "IND"},
                 {"name": "Dillon Gabriel", "nfl_team": "CLE"},
-                {"name": "Derek Carr", "nfl_team": "NO"},
                 {"name": "J.J. McCarthy", "nfl_team": "MIN"},
+                {"name": "Ty Simpson", "nfl_team": "TBD"},
+                {"name": "Cade Klubnik", "nfl_team": "TBD"},
             ]
         },
         "Team Rose": {
@@ -468,12 +484,12 @@ def seed_database(season: int = 2025, db: Session = Depends(get_db)):
             "qbs": [
                 {"name": "Dak Prescott", "nfl_team": "DAL"},
                 {"name": "Kyler Murray", "nfl_team": "ARI"},
-                {"name": "Anthony Richardson", "nfl_team": "IND"},
                 {"name": "Jordan Love", "nfl_team": "GB"},
-                {"name": "Joe Milton III", "nfl_team": "DAL"},
                 {"name": "Jayden Daniels", "nfl_team": "WAS"},
-                {"name": "Jalen Milroe", "nfl_team": "SEA"},
                 {"name": "Will Howard", "nfl_team": "PIT"},
+                {"name": "Francisco Mendoza", "nfl_team": "TBD"},
+                {"name": "Kirk Cousins", "nfl_team": "ATL"},
+                {"name": "Davis Mills", "nfl_team": "HOU"},
             ]
         },
     }

@@ -7,11 +7,29 @@ class StandingsService:
     Service for calculating league standings based on top 5 QBs per squad.
     """
 
-    # League dues for 2025 season (Section 2 of league_rules.md)
-    LEAGUE_DUES_2025 = 70
+    # League dues per season (Section 2 of league_rules.md).
+    # Dues rise 10% each season, rounded to the nearest $5.
+    LEAGUE_DUES_BY_SEASON = {
+        2021: 50,
+        2022: 55,
+        2023: 60,
+        2024: 65,
+        2025: 70,
+        2026: 75,
+    }
+    DEFAULT_SEASON = 2026
 
     @staticmethod
-    def get_projected_payout(rank: int, season: int = 2025) -> int:
+    def get_league_dues(season: int) -> int:
+        """Return the league dues for a season (falls back to the latest known)."""
+        dues_map = StandingsService.LEAGUE_DUES_BY_SEASON
+        if season in dues_map:
+            return dues_map[season]
+        # Unknown season: use the most recent configured value.
+        return dues_map[max(dues_map)]
+
+    @staticmethod
+    def get_projected_payout(rank: int, season: int = DEFAULT_SEASON) -> int:
         """
         Calculate projected payout based on current rank.
 
@@ -28,10 +46,11 @@ class StandingsService:
         Returns:
             Projected payout (positive = earnings, negative = loss)
         """
-        dues = StandingsService.LEAGUE_DUES_2025
+        dues = StandingsService.get_league_dues(season)
 
         if rank == 1:
-            # 1st place receives all dues: $70*3 + $210 = $420
+            # 1st receives all dues from losers: 3rd/4th/5th (3x dues) + 6th (3x dues)
+            # e.g. $70 -> +$420, $75 -> +$450
             return (dues * 3) + (dues * 3)
         elif rank == 2:
             # 2nd place doesn't pay

@@ -1,20 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../services/api';
+import { useSeason } from '../context/SeasonContext';
 
 export default function PlayerStandings() {
+  const { season } = useSeason();
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     loadPlayers();
-  }, []);
+  }, [season]);
 
   const loadPlayers = async () => {
     try {
       setLoading(true);
-      const data = await api.getQuarterbacks();
+      const data = await api.getQuarterbacks(season);
       // Show all rostered QBs (even with 0 points) + free agents with >0 points
       const filteredPlayers = data.quarterbacks.filter(qb =>
         qb.squad_name !== 'Free Agent' || qb.total_points > 0
