@@ -444,12 +444,12 @@ def seed_database(season: int = 2026, db: Session = Depends(get_db)):
             "owner": "Marc Orlando",
             "qbs": [
                 {"name": "Josh Allen", "nfl_team": "BUF"},
-                {"name": "Geno Smith", "nfl_team": "LV"},
+                {"name": "Geno Smith", "nfl_team": "NYJ"},
                 {"name": "Cam Ward", "nfl_team": "TEN"},
                 {"name": "Drake Maye", "nfl_team": "NE"},
                 {"name": "Shedeur Sanders", "nfl_team": "CLE"},
                 {"name": "Deshaun Watson", "nfl_team": "CLE"},
-                {"name": "Carson Beck", "nfl_team": "TBD"},
+                {"name": "Carson Beck", "nfl_team": "ARI"},
                 {"name": "Jacoby Brissett", "nfl_team": "ARI"},
             ]
         },
@@ -462,7 +462,7 @@ def seed_database(season: int = 2026, db: Session = Depends(get_db)):
                 {"name": "Sam Darnold", "nfl_team": "SEA"},
                 {"name": "Tyler Shough", "nfl_team": "NO"},
                 {"name": "Caleb Williams", "nfl_team": "CHI"},
-                {"name": "Drew Allar", "nfl_team": "TBD"},
+                {"name": "Drew Allar", "nfl_team": "PIT"},
                 {"name": "Spencer Rattler", "nfl_team": "NO"},
             ]
         },
@@ -475,8 +475,8 @@ def seed_database(season: int = 2026, db: Session = Depends(get_db)):
                 {"name": "Daniel Jones", "nfl_team": "IND"},
                 {"name": "Dillon Gabriel", "nfl_team": "CLE"},
                 {"name": "J.J. McCarthy", "nfl_team": "MIN"},
-                {"name": "Ty Simpson", "nfl_team": "TBD"},
-                {"name": "Cade Klubnik", "nfl_team": "TBD"},
+                {"name": "Ty Simpson", "nfl_team": "LAR"},
+                {"name": "Cade Klubnik", "nfl_team": "NYJ"},
             ]
         },
         "Team Rose": {
@@ -487,8 +487,8 @@ def seed_database(season: int = 2026, db: Session = Depends(get_db)):
                 {"name": "Jordan Love", "nfl_team": "GB"},
                 {"name": "Jayden Daniels", "nfl_team": "WAS"},
                 {"name": "Will Howard", "nfl_team": "PIT"},
-                {"name": "Francisco Mendoza", "nfl_team": "TBD"},
-                {"name": "Kirk Cousins", "nfl_team": "ATL"},
+                {"name": "Fernando Mendoza", "nfl_team": "LV"},
+                {"name": "Kirk Cousins", "nfl_team": "LV"},
                 {"name": "Davis Mills", "nfl_team": "HOU"},
             ]
         },
