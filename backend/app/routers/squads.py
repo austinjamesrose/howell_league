@@ -7,7 +7,7 @@ from app.services.standings import StandingsService
 router = APIRouter(prefix="/api/squads", tags=["squads"])
 
 @router.get("/")
-def get_all_squads(season: int = 2025, db: Session = Depends(get_db)):
+def get_all_squads(season: int = 2026, db: Session = Depends(get_db)):
     """
     Get all squads for a season with their total points.
     """

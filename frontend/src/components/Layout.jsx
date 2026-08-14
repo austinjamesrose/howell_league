@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import { useSeason } from '../context/SeasonContext';
 
 export default function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { season, setSeason, seasons } = useSeason();
 
   const navLinks = [
     { to: '/', label: 'Standings' },
@@ -33,7 +35,7 @@ export default function Layout() {
                   HOWELL LEAGUE
                 </span>
                 <span className="hidden sm:inline text-text-muted text-xs ml-3">
-                  2025 Season
+                  {season} Season
                 </span>
               </div>
             </Link>
@@ -55,6 +57,23 @@ export default function Layout() {
                   {link.label}
                 </Link>
               ))}
+
+              {/* Season switcher */}
+              <label className="ml-3 flex items-center gap-2">
+                <span className="sr-only">Season</span>
+                <select
+                  value={season}
+                  onChange={(e) => setSeason(e.target.value)}
+                  className="bg-dark-elevated border border-border-subtle text-gold font-oswald font-semibold uppercase tracking-wide text-sm rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-gold cursor-pointer"
+                  aria-label="Select season"
+                >
+                  {seasons.map((yr) => (
+                    <option key={yr} value={yr}>
+                      {yr}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
 
             {/* Hamburger button for mobile */}
@@ -78,6 +97,26 @@ export default function Layout() {
           {/* Mobile menu dropdown */}
           {mobileMenuOpen && (
             <div className="md:hidden pb-4 border-t border-border-subtle mt-2 pt-4">
+              {/* Season switcher */}
+              <div className="px-4 pb-3 mb-2 border-b border-border-subtle">
+                <label className="flex items-center justify-between">
+                  <span className="font-oswald text-sm font-medium uppercase tracking-wide text-text-secondary">
+                    Season
+                  </span>
+                  <select
+                    value={season}
+                    onChange={(e) => setSeason(e.target.value)}
+                    className="bg-dark-elevated border border-border-subtle text-gold font-oswald font-semibold uppercase tracking-wide text-sm rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-gold"
+                    aria-label="Select season"
+                  >
+                    {seasons.map((yr) => (
+                      <option key={yr} value={yr}>
+                        {yr}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
               {navLinks.map((link) => (
                 <Link
                   key={link.to}

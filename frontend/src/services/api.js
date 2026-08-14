@@ -11,18 +11,18 @@ const handleResponse = async (response) => {
 
 export const api = {
   // Standings
-  getStandings: async (season = 2025) => {
+  getStandings: async (season = 2026) => {
     const response = await fetch(`${API_BASE_URL}/api/standings/?season=${season}`);
     return handleResponse(response);
   },
 
-  getWorstQB: async (season = 2025) => {
+  getWorstQB: async (season = 2026) => {
     const response = await fetch(`${API_BASE_URL}/api/standings/worst-qb/?season=${season}`);
     return handleResponse(response);
   },
 
   // Squads
-  getSquads: async (season = 2025) => {
+  getSquads: async (season = 2026) => {
     const response = await fetch(`${API_BASE_URL}/api/squads/?season=${season}`);
     return handleResponse(response);
   },
@@ -33,7 +33,7 @@ export const api = {
   },
 
   // Quarterbacks
-  getQuarterbacks: async (season = 2025) => {
+  getQuarterbacks: async (season = 2026) => {
     const response = await fetch(`${API_BASE_URL}/api/quarterbacks/?season=${season}`);
     return handleResponse(response);
   },
@@ -71,28 +71,28 @@ export const api = {
     return handleResponse(response);
   },
 
-  syncNFLStats: async (season = 2025) => {
+  syncNFLStats: async (season = 2026) => {
     const response = await fetch(`${API_BASE_URL}/api/admin/sync-stats/?season=${season}`, {
       method: 'POST',
     });
     return handleResponse(response);
   },
 
-  syncQBWins: async (season = 2025) => {
+  syncQBWins: async (season = 2026) => {
     const response = await fetch(`${API_BASE_URL}/api/admin/sync-wins/?season=${season}`, {
       method: 'POST',
     });
     return handleResponse(response);
   },
 
-  syncPlayoffs: async (season = 2025) => {
+  syncPlayoffs: async (season = 2026) => {
     const response = await fetch(`${API_BASE_URL}/api/admin/sync-playoffs/?season=${season}`, {
       method: 'POST',
     });
     return handleResponse(response);
   },
 
-  seedAwards: async (season = 2025) => {
+  seedAwards: async (season = 2026) => {
     const response = await fetch(`${API_BASE_URL}/api/admin/seed-awards/?season=${season}`, {
       method: 'POST',
     });

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../services/api';
+import { useSeason } from '../context/SeasonContext';
 
 export default function Rosters() {
+  const { season } = useSeason();
   const [squads, setSquads] = useState([]);
   const [selectedSquad, setSelectedSquad] = useState(null);
   const [roster, setRoster] = useState(null);
@@ -11,12 +13,14 @@ export default function Rosters() {
 
   useEffect(() => {
     loadSquads();
-  }, []);
+  }, [season]);
 
   const loadSquads = async () => {
     try {
       setLoading(true);
-      const data = await api.getSquads();
+      setRoster(null);
+      setSelectedSquad(null);
+      const data = await api.getSquads(season);
       setSquads(data.squads);
       if (data.squads.length > 0) {
         loadRoster(data.squads[0].id);
