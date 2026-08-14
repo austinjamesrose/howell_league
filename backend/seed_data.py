@@ -25,11 +25,11 @@ ROSTERS = {
         "qbs": [
             {"name": "Justin Herbert", "nfl_team": "LAC"},
             {"name": "Baker Mayfield", "nfl_team": "TB"},
-            {"name": "Tua Tagovailoa", "nfl_team": "MIA"},
+            {"name": "Tua Tagovailoa", "nfl_team": "ATL"},
             {"name": "C.J. Stroud", "nfl_team": "HOU"},
             {"name": "Joe Flacco", "nfl_team": "CIN"},
             {"name": "Bo Nix", "nfl_team": "DEN"},
-            {"name": "Malik Willis", "nfl_team": "GB"},
+            {"name": "Malik Willis", "nfl_team": "MIA"},
             {"name": "Mason Rudolph", "nfl_team": "PIT"},
         ]
     },
@@ -43,7 +43,7 @@ ROSTERS = {
             {"name": "Michael Penix Jr.", "nfl_team": "ATL"},
             {"name": "Jaxson Dart", "nfl_team": "NYG"},
             {"name": "Mac Jones", "nfl_team": "SF"},
-            {"name": "Justin Fields", "nfl_team": "NYJ"},
+            {"name": "Justin Fields", "nfl_team": "KC"},
         ]
     },
     "Team Mojo": {
@@ -89,7 +89,7 @@ ROSTERS = {
         "owner": "Austin Rose",
         "qbs": [
             {"name": "Dak Prescott", "nfl_team": "DAL"},
-            {"name": "Kyler Murray", "nfl_team": "ARI"},
+            {"name": "Kyler Murray", "nfl_team": "MIN"},
             {"name": "Jordan Love", "nfl_team": "GB"},
             {"name": "Jayden Daniels", "nfl_team": "WAS"},
             {"name": "Will Howard", "nfl_team": "PIT"},
