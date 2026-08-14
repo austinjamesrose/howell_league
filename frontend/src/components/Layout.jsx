@@ -32,7 +32,7 @@ export default function Layout() {
               <span className="text-gold text-lg">▰▰▰</span>
               <div>
                 <span className="font-oswald text-xl font-bold text-white tracking-wide">
-                  HOWELL LEAGUE
+                  AR15 LEAGUE
                 </span>
                 <span className="hidden sm:inline text-text-muted text-xs ml-3">
                   {season} Season
@@ -147,7 +147,7 @@ export default function Layout() {
       <footer className="border-t border-border-subtle py-6 mt-auto">
         <div className="container mx-auto px-4 text-center">
           <p className="text-text-muted text-sm font-mono">
-            Howell League • Est. 2021
+            AR15 League • Est. 2021
           </p>
         </div>
       </footer>

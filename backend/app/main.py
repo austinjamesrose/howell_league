@@ -12,7 +12,7 @@ load_dotenv()
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="Howell League API",
+    title="AR15 League API",
     description="Fantasy Football League API for QB-only league",
     version="1.0.0"
 )
@@ -47,7 +47,7 @@ app.include_router(admin.router)
 @app.get("/")
 def root():
     return {
-        "message": "Welcome to the Howell League API",
+        "message": "Welcome to the AR15 League API",
         "docs": "/docs",
         "version": "1.0.0"
     }

@@ -2,7 +2,7 @@ from app.models.models import WeeklyStat, BonusType, PlayoffRound
 
 class ScoringEngine:
     """
-    Scoring engine based on Howell League rules (league_rules.md Section 6.2)
+    Scoring engine based on AR15 League rules (league_rules.md Section 6.2)
     """
 
     @staticmethod

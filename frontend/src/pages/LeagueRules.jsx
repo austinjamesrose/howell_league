@@ -7,7 +7,7 @@ export default function LeagueRules() {
           League Constitution
         </h1>
         <p className="text-text-secondary font-mono text-sm">
-          Official rules of the Howell League
+          Official rules of the AR15 League
         </p>
       </div>
 

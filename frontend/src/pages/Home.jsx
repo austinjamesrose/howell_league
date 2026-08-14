@@ -145,7 +145,7 @@ export default function Home() {
           League Standings
         </h1>
         <p className="text-text-secondary font-mono text-sm">
-          {season} Season • Howell League • Top 5 QBs Count
+          {season} Season • AR15 League • Top 5 QBs Count
         </p>
       </div>
 
