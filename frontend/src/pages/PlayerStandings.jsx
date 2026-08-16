@@ -59,33 +59,75 @@ export default function PlayerStandings() {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="text-center">
-        <h1 className="font-oswald text-4xl md:text-5xl font-bold text-white tracking-wide uppercase mb-2">
+        <h1 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wide uppercase mb-2">
           Player Standings
         </h1>
-        <p className="text-text-secondary font-mono text-sm">
+        <p className="text-text-secondary font-mono text-xs sm:text-sm">
           All quarterbacks ranked by total points
         </p>
       </div>
 
       {/* Leaderboard Table */}
       <div className="bg-dark-surface rounded-lg border border-border-subtle overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile: stacked cards, whole row tappable */}
+        <div className="sm:hidden divide-y divide-border-subtle">
+          {players.map((player, index) => {
+            const isFreeAgent = player.squad_name === 'Free Agent';
+            const rankDisplay = getRankDisplay(index);
+            const isTopThree = index < 3;
+
+            return (
+              <Link
+                key={player.id}
+                to={`/qb/${player.id}`}
+                className={`
+                  flex items-center gap-3 px-3 py-3
+                  ${isTopThree ? 'bg-gold/5' : ''}
+                  ${isFreeAgent ? 'opacity-60' : ''}
+                `}
+              >
+                <span className={`font-oswald text-base font-bold w-8 shrink-0 text-center ${rankDisplay.color}`}>
+                  {rankDisplay.icon}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className={`
+                    font-oswald font-semibold uppercase tracking-wide truncate
+                    ${isTopThree ? 'text-gold' : 'text-white'}
+                  `}>
+                    {player.name}
+                  </div>
+                  <div className="text-xs text-text-muted font-mono truncate">
+                    {player.nfl_team} • {isFreeAgent ? 'Free Agent' : player.squad_name}
+                  </div>
+                </div>
+                <span className={`
+                  font-mono text-lg font-bold shrink-0
+                  ${isTopThree ? 'text-gold' : 'text-white'}
+                `}>
+                  {player.total_points.toFixed(2)}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border-subtle bg-dark-elevated">
-                <th className="px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-3 lg:px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Rank
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-3 lg:px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Player
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-3 lg:px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   NFL
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-3 lg:px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Fantasy Team
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-3 lg:px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Points
                 </th>
               </tr>
@@ -105,12 +147,12 @@ export default function PlayerStandings() {
                       ${isFreeAgent ? 'opacity-60' : ''}
                     `}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap">
                       <span className={`font-oswald text-lg font-bold ${rankDisplay.color}`}>
                         {rankDisplay.icon}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap">
                       <Link
                         to={`/qb/${player.id}`}
                         className={`
@@ -122,17 +164,17 @@ export default function PlayerStandings() {
                         {player.name}
                       </Link>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap">
                       <span className="text-text-secondary font-mono text-sm">
                         {player.nfl_team}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap">
                       <span className={`text-sm ${isFreeAgent ? 'text-text-muted italic' : 'text-text-secondary'}`}>
                         {isFreeAgent ? 'Free Agent' : player.squad_name}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap text-right">
                       <span className={`
                         font-mono text-xl font-bold
                         ${isTopThree ? 'text-gold' : 'text-white'}
@@ -148,8 +190,8 @@ export default function PlayerStandings() {
         </div>
 
         {/* Footer */}
-        <div className="bg-dark-elevated px-6 py-3 border-t border-border-subtle">
-          <p className="text-text-muted text-sm font-mono">
+        <div className="bg-dark-elevated px-3 sm:px-6 py-3 border-t border-border-subtle">
+          <p className="text-text-muted text-xs sm:text-sm font-mono">
             {players.length} quarterbacks • {players.filter(p => p.squad_name === 'Free Agent').length} free agents
           </p>
         </div>

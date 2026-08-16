@@ -5,6 +5,11 @@
 @tailwind utilities;
 
 /* Base styles */
+html {
+  /* Stop mobile browsers from inflating type in landscape */
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -12,6 +17,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #0D0D0D;
   color: #FFFFFF;
+  /* Belt and braces against a stray wide child causing sideways scroll */
+  overflow-x: hidden;
+}
+
+/* Tapping shouldn't flash a grey box over our own hover/active styles */
+a, button {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Scrollbar styling for dark theme */
@@ -224,5 +236,40 @@ input::placeholder {
   }
   100% {
     transform: translateX(-50%);
+  }
+}
+
+/* Touch devices: hover styles latch after a tap and look broken, and there is
+   no pointer to pause the ticker with. */
+@media (hover: none) {
+  .card-hover:hover,
+  .table-row-hover:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .ticker:hover {
+    animation-play-state: running;
+  }
+}
+
+/* iOS zooms the page when focusing a control smaller than 16px. The nav select
+   is intentionally compact on wide screens, so only bump it on phones. */
+@media (max-width: 639px) {
+  input, select, textarea {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker {
+    animation: none;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

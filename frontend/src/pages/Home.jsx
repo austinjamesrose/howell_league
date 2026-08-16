@@ -81,6 +81,14 @@ export default function Home() {
     }
   };
 
+  const getAccentColor = (rank, totalTeams) =>
+    rank === 1 ? 'text-gold' : rank === totalTeams ? 'text-danger' : 'text-white';
+
+  const getPayoutColor = (payout) =>
+    payout > 0 ? 'text-success' : payout < 0 ? 'text-danger' : 'text-text-secondary';
+
+  const formatPayout = (payout) => `${payout > 0 ? '+' : ''}$${payout}`;
+
   const getRowStyles = (rank, totalTeams) => {
     if (rank === 1) {
       return 'border-glow-gold bg-gold/5 animate-pulse-gold';
@@ -141,10 +149,10 @@ export default function Home() {
 
       {/* Page Header */}
       <div className="text-center">
-        <h1 className="font-oswald text-4xl md:text-5xl font-bold text-white tracking-wide uppercase mb-2">
+        <h1 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wide uppercase mb-2">
           League Standings
         </h1>
-        <p className="text-text-secondary font-mono text-sm">
+        <p className="text-text-secondary font-mono text-xs sm:text-sm">
           {season} Season • AR15 League • Top 5 QBs Count
         </p>
       </div>
@@ -152,35 +160,68 @@ export default function Home() {
       {/* Standings Table */}
       <div className="bg-dark-surface rounded-lg border border-border-subtle overflow-hidden">
         {/* Table Header */}
-        <div className="bg-dark-elevated px-6 py-4 border-b border-border-subtle">
-          <div className="flex items-center justify-between">
+        <div className="bg-dark-elevated px-3 sm:px-6 py-4 border-b border-border-subtle">
+          <div className="flex items-center justify-between gap-3">
             <h2 className="font-oswald text-lg font-semibold text-white uppercase tracking-wide">
               Current Standings
             </h2>
-            <span className="text-text-muted text-xs font-mono">
+            <span className="hidden sm:inline text-text-muted text-xs font-mono">
               Based on top 5 QBs per squad
             </span>
           </div>
         </div>
 
+        {/* Mobile: stacked cards (no horizontal scrolling) */}
+        <div className="sm:hidden divide-y divide-border-subtle">
+          {standings.map((squad) => {
+            const rankDisplay = getRankDisplay(squad.rank);
+            const accent = getAccentColor(squad.rank, standings.length);
+
+            return (
+              <div
+                key={squad.squad_id}
+                className={`flex items-center gap-3 px-3 py-3 ${getRowStyles(squad.rank, standings.length)}`}
+              >
+                <span className={`font-oswald text-lg font-bold w-8 shrink-0 text-center ${rankDisplay.color}`}>
+                  {rankDisplay.icon}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className={`font-oswald font-semibold uppercase tracking-wide truncate ${accent}`}>
+                    {squad.squad_name}
+                  </div>
+                  <div className="text-text-secondary text-xs truncate">{squad.owner}</div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className={`font-mono text-lg font-bold leading-tight ${accent}`}>
+                    {squad.total_points.toFixed(2)}
+                  </div>
+                  <div className={`font-mono text-xs font-semibold ${getPayoutColor(squad.projected_payout)}`}>
+                    {formatPayout(squad.projected_payout)}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border-subtle">
-                <th className="px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-3 lg:px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Rank
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-3 lg:px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Team
                 </th>
-                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-3 lg:px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Owner
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-3 lg:px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Payout
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-3 lg:px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Points
                 </th>
               </tr>
@@ -195,36 +236,26 @@ export default function Home() {
                     key={squad.squad_id}
                     className={`table-row-hover border-b border-border-subtle last:border-b-0 ${rowStyles}`}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap">
                       <span className={`font-oswald text-lg font-bold ${rankDisplay.color}`}>
                         {rankDisplay.icon}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`font-oswald font-semibold uppercase tracking-wide ${
-                        squad.rank === 1 ? 'text-gold' : squad.rank === standings.length ? 'text-danger' : 'text-white'
-                      }`}>
+                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap">
+                      <span className={`font-oswald font-semibold uppercase tracking-wide ${getAccentColor(squad.rank, standings.length)}`}>
                         {squad.squad_name}
                       </span>
                     </td>
-                    <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
-                      <span className="text-text-secondary">{squad.owner}</span>
+                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap">
+                      <span className="text-text-secondary text-sm lg:text-base">{squad.owner}</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <span className={`font-mono font-semibold ${
-                        squad.projected_payout > 0
-                          ? 'text-success'
-                          : squad.projected_payout < 0
-                          ? 'text-danger'
-                          : 'text-text-secondary'
-                      }`}>
-                        {squad.projected_payout > 0 ? '+' : ''}${squad.projected_payout}
+                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap text-right">
+                      <span className={`font-mono font-semibold ${getPayoutColor(squad.projected_payout)}`}>
+                        {formatPayout(squad.projected_payout)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <span className={`font-mono text-xl font-bold ${
-                        squad.rank === 1 ? 'text-gold' : squad.rank === standings.length ? 'text-danger' : 'text-white'
-                      }`}>
+                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap text-right">
+                      <span className={`font-mono text-lg lg:text-xl font-bold ${getAccentColor(squad.rank, standings.length)}`}>
                         {squad.total_points.toFixed(2)}
                       </span>
                     </td>
@@ -239,13 +270,13 @@ export default function Home() {
       {/* Top 5 QBs Grid */}
       {standings.length > 0 && (
         <div className="bg-dark-surface rounded-lg border border-border-subtle overflow-hidden">
-          <div className="bg-dark-elevated px-6 py-4 border-b border-border-subtle">
+          <div className="bg-dark-elevated px-3 sm:px-6 py-4 border-b border-border-subtle">
             <h3 className="font-oswald text-lg font-semibold text-white uppercase tracking-wide">
               Top 5 QBs Per Team
             </h3>
           </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="p-3 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {standings.map((squad) => (
                 <div
                   key={squad.squad_id}
@@ -258,13 +289,13 @@ export default function Home() {
                   </div>
                   <div className="space-y-2">
                     {squad.top_qbs.map((qb, idx) => (
-                      <div key={qb.qb_id} className="flex justify-between text-sm">
-                        <span className="text-text-secondary">
+                      <div key={qb.qb_id} className="flex justify-between items-baseline gap-2 text-sm">
+                        <span className="text-text-secondary min-w-0 truncate">
                           <span className="text-gold mr-2">★</span>
                           {idx + 1}. {qb.name}
                           <span className="text-text-muted ml-1">({qb.nfl_team})</span>
                         </span>
-                        <span className="font-mono font-semibold text-white">
+                        <span className="font-mono font-semibold text-white shrink-0">
                           {qb.total_points.toFixed(2)}
                         </span>
                       </div>
@@ -284,28 +315,28 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-br from-danger/20 via-danger-dim/10 to-dark-primary" />
 
           {/* Content */}
-          <div className="relative p-8 text-center">
+          <div className="relative p-5 sm:p-8 text-center">
             <div className="mb-4">
               <span className="inline-block px-4 py-1 bg-danger/30 rounded-full text-danger text-xs font-oswald uppercase tracking-widest">
                 Hall of Shame
               </span>
             </div>
 
-            <h2 className="font-oswald text-2xl md:text-3xl font-bold text-danger uppercase tracking-wide mb-2">
+            <h2 className="font-oswald text-xl sm:text-2xl md:text-3xl font-bold text-danger uppercase tracking-wide mb-2">
               Worst QB of {season}
             </h2>
 
-            <p className="font-oswald text-4xl md:text-5xl font-bold text-white uppercase tracking-wide mb-2">
+            <p className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white uppercase tracking-wide mb-2">
               {worstQB.name}
             </p>
 
-            <p className="text-text-secondary mb-4">
+            <p className="text-text-secondary text-sm sm:text-base mb-4">
               {worstQB.nfl_team} • {worstQB.squad_name}
             </p>
 
-            <p className="font-mono text-5xl md:text-6xl font-bold text-danger mb-4">
+            <p className="font-mono text-4xl sm:text-5xl md:text-6xl font-bold text-danger mb-4">
               {worstQB.total_points.toFixed(2)}
-              <span className="text-2xl ml-2">pts</span>
+              <span className="text-xl sm:text-2xl ml-2">pts</span>
             </p>
 
             <p className="text-text-muted text-sm italic max-w-md mx-auto">

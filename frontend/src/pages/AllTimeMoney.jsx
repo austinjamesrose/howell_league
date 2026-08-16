@@ -34,7 +34,7 @@ export default function AllTimeMoney() {
     <div className="space-y-8">
       {/* Page Header */}
       <div className="text-center">
-        <h1 className="font-oswald text-4xl md:text-5xl font-bold text-white tracking-wide uppercase mb-2">
+        <h1 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wide uppercase mb-2">
           All-Time Money
         </h1>
         <p className="text-text-secondary font-mono text-sm">
@@ -45,32 +45,69 @@ export default function AllTimeMoney() {
       {/* Money Table */}
       <div className="bg-dark-surface rounded-lg border border-border-subtle overflow-hidden">
         {/* Header */}
-        <div className="bg-success/10 border-b border-success/20 px-6 py-4">
+        <div className="bg-success/10 border-b border-success/20 px-3 sm:px-6 py-4">
           <h2 className="font-oswald text-2xl font-bold text-success uppercase tracking-wide">
             Lifetime Earnings
           </h2>
           <p className="text-text-muted text-sm">Sorted by all-time winnings</p>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile: stacked cards — surfaces per-year values that the table hides */}
+        <div className="sm:hidden divide-y divide-border-subtle">
+          {moneyData.map((row, idx) => {
+            const isFirst = idx === 0;
+            const isLast = idx === moneyData.length - 1;
+
+            return (
+              <div
+                key={row.team}
+                className={`px-3 py-3 ${isFirst ? 'bg-success/5' : ''} ${isLast ? 'bg-danger/5' : ''}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className={`font-oswald text-base font-bold shrink-0 ${isFirst ? 'text-gold' : isLast ? 'text-danger' : 'text-text-secondary'}`}>
+                    {isFirst && '🏆 '}
+                    {isLast && '💸 '}
+                    #{idx + 1}
+                  </span>
+                  <span className={`font-oswald font-semibold uppercase tracking-wide truncate flex-1 min-w-0 ${isFirst ? 'text-gold' : 'text-white'}`}>
+                    {row.team}
+                  </span>
+                  <span className={`font-mono text-lg font-bold shrink-0 ${getMoneyColor(row.allTime)}`}>
+                    {formatMoney(row.allTime)}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-xs font-mono">
+                  {years.map((year) => (
+                    <span key={year} className="text-text-muted">
+                      {year}{' '}
+                      <span className={getMoneyColor(row[year])}>{formatMoney(row[year])}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border-subtle bg-dark-elevated">
-                <th className="px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-3 lg:px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Rank
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-3 lg:px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Team
                 </th>
                 {years.map((year) => (
                   <th
                     key={year}
-                    className="hidden sm:table-cell px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider"
+                    className="px-3 lg:px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider"
                   >
                     {year}
                   </th>
                 ))}
-                <th className="px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-3 lg:px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   All Time
                 </th>
               </tr>
@@ -89,14 +126,14 @@ export default function AllTimeMoney() {
                       ${isLast ? 'bg-danger/5' : ''}
                     `}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap">
                       <span className={`font-oswald text-lg font-bold ${isFirst ? 'text-gold' : isLast ? 'text-danger' : 'text-text-secondary'}`}>
                         {isFirst && '🏆 '}
                         {isLast && '💸 '}
                         #{idx + 1}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap">
                       <span className={`font-oswald font-semibold uppercase tracking-wide ${isFirst ? 'text-gold' : 'text-white'}`}>
                         {row.team}
                       </span>
@@ -104,14 +141,14 @@ export default function AllTimeMoney() {
                     {years.map((year) => (
                       <td
                         key={year}
-                        className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-right"
+                        className="px-3 lg:px-6 py-4 whitespace-nowrap text-right"
                       >
                         <span className={`font-mono text-sm font-medium ${getMoneyColor(row[year])}`}>
                           {formatMoney(row[year])}
                         </span>
                       </td>
                     ))}
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap text-right">
                       <span className={`font-mono text-xl font-bold ${getMoneyColor(row.allTime)}`}>
                         {formatMoney(row.allTime)}
                       </span>
@@ -124,7 +161,7 @@ export default function AllTimeMoney() {
         </div>
 
         {/* Footer */}
-        <div className="bg-dark-elevated px-6 py-3 border-t border-border-subtle">
+        <div className="bg-dark-elevated px-3 sm:px-6 py-3 border-t border-border-subtle">
           <p className="text-text-muted text-sm font-mono">
             Net winnings across all seasons • Updated after Super Bowl
           </p>
@@ -149,7 +186,7 @@ export default function AllTimeMoney() {
 
       {/* League Names Through the Years */}
       <div className="bg-dark-surface rounded-lg border border-border-subtle overflow-hidden">
-        <div className="bg-dark-elevated px-6 py-4 border-b border-border-subtle">
+        <div className="bg-dark-elevated px-3 sm:px-6 py-4 border-b border-border-subtle">
           <h2 className="font-oswald text-2xl font-bold text-white uppercase tracking-wide">
             League Names Through the Years
           </h2>
@@ -163,7 +200,7 @@ export default function AllTimeMoney() {
             return (
               <div
                 key={entry.season}
-                className={`flex items-center gap-4 px-6 py-4 ${isCurrent ? 'bg-gold/5' : ''}`}
+                className={`flex items-center gap-4 px-3 sm:px-6 py-4 ${isCurrent ? 'bg-gold/5' : ''}`}
               >
                 <span
                   className={`font-mono text-lg font-bold w-16 shrink-0 ${

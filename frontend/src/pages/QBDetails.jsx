@@ -56,23 +56,23 @@ export default function QBDetails() {
       {/* Player Card */}
       <div className="bg-dark-surface rounded-lg border border-border-subtle overflow-hidden">
         {/* Header */}
-        <div className="bg-dark-elevated p-6 border-b border-border-subtle">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="font-oswald text-4xl md:text-5xl font-bold text-white uppercase tracking-wide">
+        <div className="bg-dark-elevated p-4 sm:p-6 border-b border-border-subtle">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
+            <div className="min-w-0">
+              <h1 className="font-oswald text-2xl sm:text-3xl md:text-5xl font-bold text-white uppercase tracking-wide break-words">
                 {qb.name}
               </h1>
-              <p className="text-text-secondary mt-1">
+              <p className="text-text-secondary text-sm sm:text-base mt-1">
                 <span className="font-mono">{qb.nfl_team}</span>
                 <span className="mx-2">•</span>
                 <span>{qb.squad_name}</span>
               </p>
             </div>
-            <div className="text-right">
-              <div className="font-mono text-5xl md:text-6xl font-bold text-gold">
+            <div className="text-left md:text-right shrink-0">
+              <div className="font-mono text-4xl sm:text-5xl md:text-6xl font-bold text-gold leading-none">
                 {qb.total_points.toFixed(2)}
               </div>
-              <div className="text-text-muted text-sm uppercase tracking-wide">
+              <div className="text-text-muted text-xs sm:text-sm uppercase tracking-wide mt-1">
                 Total Points
               </div>
             </div>
@@ -80,9 +80,9 @@ export default function QBDetails() {
         </div>
 
         {/* Points Breakdown */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-dark-primary p-4 rounded-lg border border-border-subtle">
+        <div className="p-3 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="bg-dark-primary p-3 sm:p-4 rounded-lg border border-border-subtle">
               <div className="text-text-muted text-sm uppercase tracking-wide mb-1">
                 Weekly Stats
               </div>
@@ -90,7 +90,7 @@ export default function QBDetails() {
                 {qb.breakdown.weekly_stats.total.toFixed(2)}
               </div>
             </div>
-            <div className="bg-dark-primary p-4 rounded-lg border border-gold/20">
+            <div className="bg-dark-primary p-3 sm:p-4 rounded-lg border border-gold/20">
               <div className="text-text-muted text-sm uppercase tracking-wide mb-1">
                 Bonuses
               </div>
@@ -98,7 +98,7 @@ export default function QBDetails() {
                 {qb.breakdown.bonuses.total.toFixed(2)}
               </div>
             </div>
-            <div className="bg-dark-primary p-4 rounded-lg border border-success/20">
+            <div className="bg-dark-primary p-3 sm:p-4 rounded-lg border border-success/20">
               <div className="text-text-muted text-sm uppercase tracking-wide mb-1">
                 Playoffs
               </div>
@@ -114,9 +114,9 @@ export default function QBDetails() {
               <h2 className="font-oswald text-xl font-semibold text-white uppercase tracking-wide mb-4">
                 Season Stats
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
                 {/* Passing */}
-                <div className="bg-dark-primary p-4 rounded-lg border border-border-subtle">
+                <div className="bg-dark-primary p-3 sm:p-4 rounded-lg border border-border-subtle">
                   <div className="text-text-muted text-xs uppercase tracking-wide mb-1">
                     Pass Yards
                   </div>
@@ -124,7 +124,7 @@ export default function QBDetails() {
                     {qb.breakdown.aggregate_stats.passing_yards.toLocaleString()}
                   </div>
                 </div>
-                <div className="bg-dark-primary p-4 rounded-lg border border-border-subtle">
+                <div className="bg-dark-primary p-3 sm:p-4 rounded-lg border border-border-subtle">
                   <div className="text-text-muted text-xs uppercase tracking-wide mb-1">
                     Rush Yards
                   </div>
@@ -133,7 +133,7 @@ export default function QBDetails() {
                   </div>
                 </div>
                 {/* TDs */}
-                <div className="bg-dark-primary p-4 rounded-lg border border-success/30">
+                <div className="bg-dark-primary p-3 sm:p-4 rounded-lg border border-success/30">
                   <div className="text-text-muted text-xs uppercase tracking-wide mb-1">
                     Pass TD
                   </div>
@@ -141,7 +141,7 @@ export default function QBDetails() {
                     {qb.breakdown.aggregate_stats.passing_tds}
                   </div>
                 </div>
-                <div className="bg-dark-primary p-4 rounded-lg border border-success/30">
+                <div className="bg-dark-primary p-3 sm:p-4 rounded-lg border border-success/30">
                   <div className="text-text-muted text-xs uppercase tracking-wide mb-1">
                     Rush TD
                   </div>
@@ -150,7 +150,7 @@ export default function QBDetails() {
                   </div>
                 </div>
                 {/* Turnovers */}
-                <div className="bg-dark-primary p-4 rounded-lg border border-danger/30">
+                <div className="bg-dark-primary p-3 sm:p-4 rounded-lg border border-danger/30">
                   <div className="text-text-muted text-xs uppercase tracking-wide mb-1">
                     Interceptions
                   </div>
@@ -158,7 +158,7 @@ export default function QBDetails() {
                     {qb.breakdown.aggregate_stats.interceptions}
                   </div>
                 </div>
-                <div className="bg-dark-primary p-4 rounded-lg border border-danger/30">
+                <div className="bg-dark-primary p-3 sm:p-4 rounded-lg border border-danger/30">
                   <div className="text-text-muted text-xs uppercase tracking-wide mb-1">
                     Fumbles
                   </div>
@@ -167,7 +167,7 @@ export default function QBDetails() {
                   </div>
                 </div>
                 {/* Wins */}
-                <div className="bg-dark-primary p-4 rounded-lg border border-gold/30">
+                <div className="bg-dark-primary p-3 sm:p-4 rounded-lg border border-gold/30">
                   <div className="text-text-muted text-xs uppercase tracking-wide mb-1">
                     Regular Wins
                   </div>
@@ -178,7 +178,7 @@ export default function QBDetails() {
                     </span>
                   </div>
                 </div>
-                <div className="bg-dark-primary p-4 rounded-lg border border-gold/30">
+                <div className="bg-dark-primary p-3 sm:p-4 rounded-lg border border-gold/30">
                   <div className="text-text-muted text-xs uppercase tracking-wide mb-1">
                     Prime Time Wins
                   </div>
@@ -203,7 +203,7 @@ export default function QBDetails() {
                 {qb.breakdown.bonuses.awards.map((bonus, idx) => (
                   <div
                     key={idx}
-                    className="flex justify-between items-center bg-gold/10 border border-gold/20 p-4 rounded-lg"
+                    className="flex justify-between items-center gap-3 bg-gold/10 border border-gold/20 p-3 sm:p-4 rounded-lg"
                   >
                     <span className="font-oswald font-medium text-white uppercase tracking-wide">
                       {bonus.type.replace(/_/g, ' ')}
@@ -227,7 +227,7 @@ export default function QBDetails() {
                 {qb.breakdown.playoffs.appearances.map((playoff, idx) => (
                   <div
                     key={idx}
-                    className="flex justify-between items-center bg-success/10 border border-success/20 p-4 rounded-lg"
+                    className="flex justify-between items-center gap-3 bg-success/10 border border-success/20 p-3 sm:p-4 rounded-lg"
                   >
                     <div className="flex items-center gap-3">
                       <span className="font-oswald font-medium text-white uppercase tracking-wide">
