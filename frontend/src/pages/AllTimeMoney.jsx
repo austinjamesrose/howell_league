@@ -1,14 +1,14 @@
 export default function AllTimeMoney() {
   const moneyData = [
-    { team: 'Team Jar-Jar', 2024: -65, 2023: 360, 2022: 330, 2021: 0, allTime: 625 },
-    { team: 'Team TK', 2024: 390, 2023: -60, 2022: 0, 2021: -50, allTime: 280 },
-    { team: 'Team BMOC', 2024: -65, 2023: -180, 2022: -55, 2021: 300, allTime: 0 },
-    { team: 'Team AP', 2024: 0, 2023: 0, 2022: -55, 2021: -150, allTime: -205 },
-    { team: 'Team ROSE', 2024: -65, 2023: -60, 2022: -165, 2021: -50, allTime: -340 },
-    { team: 'Team MOJO', 2024: -195, 2023: -60, 2022: -55, 2021: -50, allTime: -360 },
+    { team: 'Team Jar-Jar', 2025: 0, 2024: -65, 2023: 360, 2022: 330, 2021: 0, allTime: 625 },
+    { team: 'Team BMOC', 2025: 420, 2024: -65, 2023: -180, 2022: -55, 2021: 300, allTime: 420 },
+    { team: 'Team TK', 2025: -70, 2024: 390, 2023: -60, 2022: 0, 2021: -50, allTime: 210 },
+    { team: 'Team AP', 2025: -70, 2024: 0, 2023: 0, 2022: -55, 2021: -150, allTime: -275 },
+    { team: 'Team MOJO', 2025: -70, 2024: -195, 2023: -60, 2022: -55, 2021: -50, allTime: -430 },
+    { team: 'Team ROSE', 2025: -210, 2024: -65, 2023: -60, 2022: -165, 2021: -50, allTime: -550 },
   ];
 
-  const years = [2024, 2023, 2022, 2021];
+  const years = [2025, 2024, 2023, 2022, 2021];
 
   // League naming tradition: the season's worst QB lends their name to the
   // league. Newest first. `namesake` is optional (the QB the name honors).
@@ -93,21 +93,21 @@ export default function AllTimeMoney() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border-subtle bg-dark-elevated">
-                <th className="px-3 lg:px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-2 md:px-3 lg:px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Rank
                 </th>
-                <th className="px-3 lg:px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-2 md:px-3 lg:px-6 py-3 text-left text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   Team
                 </th>
                 {years.map((year) => (
                   <th
                     key={year}
-                    className="px-3 lg:px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider"
+                    className="px-2 md:px-3 lg:px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider"
                   >
                     {year}
                   </th>
                 ))}
-                <th className="px-3 lg:px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-2 md:px-3 lg:px-6 py-3 text-right text-xs font-oswald font-medium text-text-muted uppercase tracking-wider">
                   All Time
                 </th>
               </tr>
@@ -126,14 +126,14 @@ export default function AllTimeMoney() {
                       ${isLast ? 'bg-danger/5' : ''}
                     `}
                   >
-                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap">
+                    <td className="px-2 md:px-3 lg:px-6 py-4 whitespace-nowrap">
                       <span className={`font-oswald text-lg font-bold ${isFirst ? 'text-gold' : isLast ? 'text-danger' : 'text-text-secondary'}`}>
                         {isFirst && '🏆 '}
                         {isLast && '💸 '}
                         #{idx + 1}
                       </span>
                     </td>
-                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap">
+                    <td className="px-2 md:px-3 lg:px-6 py-4 whitespace-nowrap">
                       <span className={`font-oswald font-semibold uppercase tracking-wide ${isFirst ? 'text-gold' : 'text-white'}`}>
                         {row.team}
                       </span>
@@ -141,14 +141,14 @@ export default function AllTimeMoney() {
                     {years.map((year) => (
                       <td
                         key={year}
-                        className="px-3 lg:px-6 py-4 whitespace-nowrap text-right"
+                        className="px-2 md:px-3 lg:px-6 py-4 whitespace-nowrap text-right"
                       >
                         <span className={`font-mono text-sm font-medium ${getMoneyColor(row[year])}`}>
                           {formatMoney(row[year])}
                         </span>
                       </td>
                     ))}
-                    <td className="px-3 lg:px-6 py-4 whitespace-nowrap text-right">
+                    <td className="px-2 md:px-3 lg:px-6 py-4 whitespace-nowrap text-right">
                       <span className={`font-mono text-xl font-bold ${getMoneyColor(row.allTime)}`}>
                         {formatMoney(row.allTime)}
                       </span>
