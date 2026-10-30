@@ -101,7 +101,11 @@ class NFLStatsService:
             passing_tds = int(row.get('passing_tds', 0) or 0)
             rushing_tds = int(row.get('rushing_tds', 0) or 0)
             interceptions = int(row.get('passing_interceptions', 0) or 0)
-            fumbles_lost = int(row.get('sack_fumbles_lost', 0) or 0)
+            # Count every lost fumble (sacks, runs and the rare reception)
+            fumbles_lost = sum(
+                int(row.get(col, 0) or 0)
+                for col in ('sack_fumbles_lost', 'rushing_fumbles_lost', 'receiving_fumbles_lost')
+            )
 
             # Games won - will need manual entry or additional lookup
             games_won = 0  # TODO: Implement game results lookup
